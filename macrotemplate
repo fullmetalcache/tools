@@ -84,7 +84,7 @@ Sub iDn()
     $$$FILENAME$$$
     Dim oFile As Object
     Set oFile = myFso.CreateTextFile(fileName)
-    Dim enc
+    Dim enc As String
     enc = ""
     $$$ENCODED$$$
     oFile.Write Decode64(enc)
