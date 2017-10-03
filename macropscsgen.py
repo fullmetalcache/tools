@@ -1,3 +1,5 @@
+#example usage: python macrogen.py -a x64 -P tcp -l x.x.x.x -p 554
+
 import argparse
 import base64
 import subprocess
