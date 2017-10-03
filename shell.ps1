@@ -513,6 +513,6 @@ Warning: This script has no way to validate that your shellcode is 32 vs. 64-bit
 }
 
 #Paste code below this line
-
+$$$SHELLCODE$$$
 #Don't modify below this line
 Invoke-Shellcode -Shellcode $buf -Force
