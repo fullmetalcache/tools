@@ -1,0 +1,6 @@
+Dim myFSO as New FileSystemObject
+Dim myStream As TextStream
+Dim fileName = "C:\Users\Public\temp.cs"
+Set myStream = myFSO.CreateTextFile(fileName, True)
+
+$$$ENCODED$$$
