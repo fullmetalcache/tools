@@ -1,4 +1,4 @@
-#example usage: python macrogen.py -a x64 -P tcp -l x.x.x.x -p 554
+#example usage: python macropscsgen.py -a x64 -P tcp -l x.x.x.x -p 554
 
 import argparse
 import base64
