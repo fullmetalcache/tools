@@ -22,7 +22,6 @@ namespace ntlmSpray
 				Console.Write("\r                                                      ");
 				Console.Write("\r Sprayed " + currIdx.ToString() + " of " + len.ToString() + " users");
 			}
-            //Console.WriteLine("Hello World!");
         		string url = "";
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 			request.Method = "GET";
@@ -31,7 +30,6 @@ namespace ntlmSpray
 			request.AllowWriteStreamBuffering = false;
 
 			string user = @"domainName\" + uname;
-			string password = @"Password1";
 			string password = @"Password1";
 			if (string.IsNullOrEmpty(user) == false && string.IsNullOrEmpty(password) == false)
 			{
