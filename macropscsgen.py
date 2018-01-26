@@ -41,10 +41,10 @@ def createMacro(arch, windows):
     
     if windows == '7':
         CompileCmd = CompileCmd.replace("Version", WindowsVersion7)
-        InstalInstallUtilCmd = InstalInstallUtilCmd.replace("Version", WindowsVersion7)
+        InstallUtilCmd = InstallUtilCmd.replace("Version", WindowsVersion7)
     elif windows == '10':
         CompileCmd = CompileCmd.replace("Version", WindowsVersion10)
-        InstalInstallUtilCmd = InstallUtilCmd.replace("Version", WindowsVersion10)
+        InstallUtilCmd = InstallUtilCmd.replace("Version", WindowsVersion10)
     
     if arch == 'x64':
         CompileCmd = CompileCmd.replace("Arch", "64")
