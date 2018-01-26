@@ -40,18 +40,18 @@ def createMacro(arch, windows):
     InstallUtilCmd = 'C:\\\\Windows\\\\Microsoft.NET\\\\FrameworkArch\\\\Version\\\\InstallUtil.exe /LogToConsole=false /U '
     
     if windows == '7':
-        CompileCmd.replace("Version", WindowsVersion7)
-        InstallUtilCmd.replace("Version", WindowsVersion7)
+        CompileCmd = CompileCmd.replace("Version", WindowsVersion7)
+        InstalInstallUtilCmd = InstalInstallUtilCmd.replace("Version", WindowsVersion7)
     elif windows == '10':
-        CompileCmd.replace("Version", WindowsVersion10)
-        InstallUtilCmd.replace("Version", WindowsVersion10)
+        CompileCmd = CompileCmd.replace("Version", WindowsVersion10)
+        InstalInstallUtilCmd = InstallUtilCmd.replace("Version", WindowsVersion10)
     
     if arch == 'x64':
-        CompileCmd.replace("Arch", "64")
-        InstallUtilCmd.replace("Arch", "64")
+        CompileCmd = CompileCmd.replace("Arch", "64")
+        InstallUtilCmd = InstallUtilCmd.replace("Arch", "64")
     elif arch == 'x86':
-        CompileCmd.replace("Arch", "")
-        InstallUtilCmd.replace("Arch", "")
+        CompileCmd = CompileCmd.replace("Arch", "")
+        InstallUtilCmd = InstallUtilCmd.replace("Arch", "")
         
     macroTemp = grabMacroTemplate()
 
