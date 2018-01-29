@@ -103,7 +103,7 @@ def createPsScript(psScript):
     psLines = psScript.split('\n')
 
     for line in psLines:
-        if '$$$SHELLCODE$$$' in line:
+        if '$$$SCODE$$$' in line:
             fin = open(tmpShellFile)
             for lineShell in fin:
                 fout.write(lineShell)
