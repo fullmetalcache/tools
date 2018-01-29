@@ -6,6 +6,7 @@ import subprocess
 import urllib2
 import random
 import string
+import itertools
 
 tmpPsFile = 'tmpps.txt'
 tmpShellFile = 'tmpshell.txt'
