@@ -6,7 +6,7 @@ import subprocess
 import urllib2
 import random
 import string
-import itertools
+from itertools import *
 
 tmpPsFile = 'tmpps.txt'
 tmpShellFile = 'tmpshell.txt'
@@ -90,7 +90,7 @@ def xorEncodeFile(fileName, key):
     data = fin.read().encode()
     xored = ''.join(chr(ord(x) ^ ord(y)) for (x,y) in izip(data, cycle(key)))
     
-    return base64.encodestring(xored).strip()
+    return base64.b64encode(xored)
     
 def encodeFile(fileName):
     fin = open(fileName, 'r')
