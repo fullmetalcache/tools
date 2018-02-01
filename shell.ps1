@@ -341,4 +341,4 @@ function Invoke-Niceness
 
 #$$$SCODE$$$
 
-Play-Niceness -Niceness $buf -Force
+Invoke-Niceness -Niceness $buf -Force
