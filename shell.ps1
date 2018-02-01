@@ -125,7 +125,7 @@ function Invoke-Niceness
         $IsWow64 = $false
 
         if ($64bitOS)
-		{
+	{
             $IsWow64Process.Invoke($hProcess, [Ref] $IsWow64) | Out-Null
             
             if ((!$IsWow64) -and $PowerShell32bit)
