@@ -344,4 +344,4 @@ function Playnice-Coolness
 #$$$SCODE$$$
 #Don't modify below this line
 
-Playnice-Coolness -Coolness $buf -Forces
+Playnice-Coolness -Coolness $buf -Force
