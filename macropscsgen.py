@@ -81,7 +81,7 @@ def createMacro(arch, windows):
                 if(idx > 20):
                     encodedChunked += "End Sub\n\n"
                     funNum = funNum + 1
-                    encodedChunked += "Sub funFun" + str(funNum) + "ByRef encIn As String)\n"
+                    encodedChunked += "Sub funFun" + str(funNum) + "(ByRef encIn As String)\n"
                     idx = 0
 
             if idx == 0:
