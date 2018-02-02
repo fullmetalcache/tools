@@ -76,6 +76,7 @@ Public Function Decode64(sString As String) As String
 
 End Function
 
+$$$SUBCAT$$$
 
 Sub iDn()
     Dim myFso As Object

