@@ -1,5 +1,3 @@
-focus on best practices
-send over email on PO# Note: This version of autokerberoast relies heavily on functions from https://github.com/nidem/kerberoast/blob/master/GetUserSPNs.ps1
 function List-UserSPNs
 {
 
